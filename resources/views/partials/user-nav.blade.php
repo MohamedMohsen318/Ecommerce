@@ -10,9 +10,8 @@
                     <button type="submit" class="text-stone-600 hover:text-brand-600">تسجيل خروج</button>
                 </form>
             @else
-                <a href="{{ route('login.create') }}" class="text-stone-600 hover:text-brand-600">دخول</a>
-                <a href="{{ route('register.create') }}" class="text-stone-600 hover:text-brand-600">حساب جديد</a>
-            @endauth
+                <a href="{{ route('login.create') }}" class="text-stone-600 hover:text-brand-600">{{ __('auth.nav_login') }}</a>
+                <a href="{{ route('register.create') }}" class="text-stone-600 hover:text-brand-600">{{ __('auth.nav_register') }}</a>    @endauth
         </div>
     </div>
 </nav>

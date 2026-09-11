@@ -23,7 +23,7 @@ class AuthController extends Controller
         $this->authService->register($request->validated());
 
         return redirect()->route('home')
-            ->with('success', 'تم إنشاء الحساب بنجاح!');
+            ->with('success', __('auth.account_created'));
     }
 
     public function showLogin()
@@ -40,14 +40,14 @@ class AuthController extends Controller
 
         if (! $ok) {
             return back()
-                ->withErrors(['email' => 'البيانات المدخلة غير صحيحة.'])
+                ->withErrors(['email' => __('auth.invalid_credentials')])
                 ->onlyInput('email');
         }
 
         $request->session()->regenerate();
 
         return redirect()->intended(route('home'))
-            ->with('success', 'أهلاً بيك!');
+            ->with('success', __('auth.welcome_back'));
     }
 
     public function logout(): RedirectResponse
