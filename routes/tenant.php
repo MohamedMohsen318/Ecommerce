@@ -8,8 +8,7 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\AdminController;
-
-
+use App\Http\Controllers\Admin\CategoryController;
 
 Route::middleware([
     'web',
@@ -43,23 +42,6 @@ Route::middleware([
         Route::middleware('auth:admins')->group(function () {
             Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
-            Route::get('/dashboard', function () {
-                return view('admin.dashboard');
-            })->name('dashboard');
-        });
-
-    });
-
-    Route::prefix('admin')->name('admin.')->group(function () {
-
-        Route::middleware('guest:admins')->group(function () {
-            Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login.create');
-            Route::post('/login', [AdminAuthController::class, 'login'])->name('login.store');
-        });
-
-        Route::middleware('auth:admins')->group(function () {
-            Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
-
             Route::middleware('permission:view_dashboard,admins')
                 ->get('/dashboard', function () {
                     return view('admin.dashboard');
@@ -67,6 +49,10 @@ Route::middleware([
 
             Route::middleware('permission:manage_admins,admins')->group(function () {
                 Route::resource('admins', AdminController::class)->except(['show']);
+            });
+
+            Route::middleware('permission:manage_categories,admins')->group(function () {
+                Route::resource('categories', CategoryController::class)->except(['show']);
             });
         });
 
