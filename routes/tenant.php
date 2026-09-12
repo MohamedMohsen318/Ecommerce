@@ -6,6 +6,8 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
+
 
 Route::middleware([
     'web',
@@ -27,6 +29,23 @@ Route::middleware([
 
     Route::middleware('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    });
+
+    Route::prefix('admin')->name('admin.')->group(function () {
+
+        Route::middleware('guest:admins')->group(function () {
+            Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login.create');
+            Route::post('/login', [AdminAuthController::class, 'login'])->name('login.store');
+        });
+
+        Route::middleware('auth:admins')->group(function () {
+            Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+
+            Route::get('/dashboard', function () {
+                return view('admin.dashboard');
+            })->name('dashboard');
+        });
+
     });
 
 });
