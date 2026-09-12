@@ -3,12 +3,13 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AuthController;
-use Illuminate\Support\Facades\Route;
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
-use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ItemController;
+use Illuminate\Support\Facades\Route;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 Route::middleware([
     'web',
@@ -16,46 +17,99 @@ Route::middleware([
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
 
+    // Home
+
     Route::get('/', function () {
         return view('welcome');
     })->name('home');
 
-    Route::middleware('guest')->group(function () {
-        Route::get('/register', [AuthController::class, 'showRegister'])->name('register.create');
-        Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 
-        Route::get('/login', [AuthController::class, 'showLogin'])->name('login.create');
-        Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+    // Customer Authentication
+
+    Route::middleware('guest')->group(function () {
+
+        Route::get('/register', [AuthController::class, 'showRegister'])
+            ->name('register.create');
+
+        Route::post('/register', [AuthController::class, 'register'])
+            ->name('register.store');
+
+        Route::get('/login', [AuthController::class, 'showLogin'])
+            ->name('login.create');
+
+        Route::post('/login', [AuthController::class, 'login'])
+            ->name('login.store');
     });
 
     Route::middleware('auth')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+        Route::post('/logout', [AuthController::class, 'logout'])
+            ->name('logout');
     });
 
-    Route::prefix('admin')->name('admin.')->group(function () {
 
-        Route::middleware('guest:admins')->group(function () {
-            Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login.create');
-            Route::post('/login', [AdminAuthController::class, 'login'])->name('login.store');
-        });
+    // Admin
 
-        Route::middleware('auth:admins')->group(function () {
-            Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+    Route::prefix('admin')
+        ->name('admin.')
+        ->group(function () {
 
-            Route::middleware('permission:view_dashboard,admins')
-                ->get('/dashboard', function () {
-                    return view('admin.dashboard');
-                })->name('dashboard.index');
+            // Admin Authentication
 
-            Route::middleware('permission:manage_admins,admins')->group(function () {
-                Route::resource('admins', AdminController::class)->except(['show']);
+            Route::middleware('guest:admins')->group(function () {
+
+                Route::get('/login', [AdminAuthController::class, 'showLogin'])
+                    ->name('login.create');
+
+                Route::post('/login', [AdminAuthController::class, 'login'])
+                    ->name('login.store');
             });
 
-            Route::middleware('permission:manage_categories,admins')->group(function () {
-                Route::resource('categories', CategoryController::class)->except(['show']);
+
+            // Admin Protected Routes
+
+            Route::middleware('auth:admins')->group(function () {
+
+                // Admin Logout
+
+                Route::post('/logout', [AdminAuthController::class, 'logout'])
+                    ->name('logout');
+
+
+                // Dashboard
+
+                Route::middleware('permission:view_dashboard,admins')
+                    ->get('/dashboard', function () {
+                        return view('admin.dashboard');
+                    })
+                    ->name('dashboard.index');
+
+
+                // Admin Management
+
+                Route::middleware('permission:manage_admins,admins')->group(function () {
+
+                    Route::resource('admins', AdminController::class)
+                        ->except(['show']);
+                });
+
+
+                // Category Management
+
+                Route::middleware('permission:manage_categories,admins')->group(function () {
+
+                    Route::resource('categories', CategoryController::class)
+                        ->except(['show']);
+                });
+
+
+                // Item Management
+
+                Route::middleware('permission:manage_items,admins')->group(function () {
+
+                    Route::resource('items', ItemController::class)
+                        ->except(['show']);
+                });
             });
         });
-
-    });
-
 });

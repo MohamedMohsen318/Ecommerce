@@ -7,6 +7,7 @@ enum PermissionEnum: string
     case ViewDashboard = 'view_dashboard';
     case ManageAdmins = 'manage_admins';
     case ManageCategories = 'manage_categories';
+    case ManageItems = 'manage_items';
 
     public static function values(): array
     {

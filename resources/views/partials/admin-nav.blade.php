@@ -27,6 +27,13 @@
         </a>
     @endif
 
+    @if (auth('admins')->user()?->can('manage_items'))
+        <a href="{{ route('admin.items.index') }}"
+           class="block rounded-lg px-3 py-2 hover:bg-stone-800 {{ request()->routeIs('admin.items.*') ? 'bg-stone-800 text-white' : '' }}">
+            Items
+        </a>
+    @endif
+
     <form method="POST" action="{{ route('admin.logout') }}" class="border-t border-stone-800 px-3 py-4">
         @csrf
         <button type="submit" class="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-stone-800">Log out</button>
