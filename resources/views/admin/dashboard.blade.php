@@ -1,12 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'Admin Dashboard')
+@section('title', 'Dashboard')
 
 @section('content')
-    <div>
-        <h1 class="font-display text-3xl font-semibold text-stone-900">
-            Welcome, {{ auth('admins')->user()->name }}
-        </h1>
-        <p class="mt-2 text-stone-500">Role: {{ auth('admins')->user()->getRoleNames()->implode(', ') }}</p>
-    </div>
+    <h2 class="text-xl font-semibold text-stone-900">Welcome, {{ auth('admins')->user()->name }}</h2>
+    <p class="mt-2 text-stone-500">Role: {{ auth('admins')->user()->getRoleNames()->implode(', ') }}</p>
 @endsection
