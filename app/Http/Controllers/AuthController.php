@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Services\AuthService;
+use App\Services\CartService;
 use Illuminate\Http\RedirectResponse;
 
 class AuthController extends Controller
 {
     public function __construct(
-        protected AuthService $authService
+        protected AuthService $authService,
+        protected CartService $cartService,
     ) {}
 
     public function showRegister()
@@ -20,7 +22,11 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request): RedirectResponse
     {
-        $this->authService->register($request->validated());
+        $guestSessionId = $request->session()->getId();
+
+        $user = $this->authService->register($request->validated());
+
+        $this->cartService->mergeGuestCartIntoUser($guestSessionId, $user->id);
 
         return redirect()->route('home')
             ->with('success', __('auth.account_created'));
@@ -33,6 +39,8 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): RedirectResponse
     {
+        $guestSessionId = $request->session()->getId();
+
         $ok = $this->authService->login(
             $request->validated(),
             $request->boolean('remember')
@@ -43,6 +51,8 @@ class AuthController extends Controller
                 ->withErrors(['email' => __('auth.invalid_credentials')])
                 ->onlyInput('email');
         }
+
+        $this->cartService->mergeGuestCartIntoUser($guestSessionId, auth()->id());
 
         $request->session()->regenerate();
 

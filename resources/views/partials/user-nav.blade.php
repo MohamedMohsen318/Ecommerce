@@ -3,6 +3,9 @@
         <a href="{{ route('home') }}" class="font-display text-lg font-semibold">{{ config('app.name') }}</a>
 
         <div class="flex items-center gap-4 text-sm">
+            <a href="{{ route('shop.index') }}" class="text-stone-600 hover:text-brand-600">Shop</a>
+            <a href="{{ route('cart.index') }}" class="text-stone-600 hover:text-brand-600">Cart</a>
+
             @auth
                 <span class="text-stone-600">أهلاً، {{ auth()->user()->name }}</span>
                 <form method="POST" action="{{ route('logout') }}">
@@ -11,7 +14,8 @@
                 </form>
             @else
                 <a href="{{ route('login.create') }}" class="text-stone-600 hover:text-brand-600">{{ __('auth.nav_login') }}</a>
-                <a href="{{ route('register.create') }}" class="text-stone-600 hover:text-brand-600">{{ __('auth.nav_register') }}</a>    @endauth
+                <a href="{{ route('register.create') }}" class="text-stone-600 hover:text-brand-600">{{ __('auth.nav_register') }}</a>
+            @endauth
         </div>
     </div>
 </nav>

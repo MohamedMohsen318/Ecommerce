@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\ShopController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -46,6 +48,32 @@ Route::middleware([
         Route::post('/logout', [AuthController::class, 'logout'])
             ->name('logout');
     });
+
+
+    // Shop
+
+    Route::get('/shop', [ShopController::class, 'index'])
+        ->name('shop.index');
+
+
+    // Cart
+
+    Route::prefix('cart')
+        ->name('cart.')
+        ->group(function () {
+
+            Route::get('/', [CartController::class, 'index'])
+                ->name('index');
+
+            Route::post('/', [CartController::class, 'store'])
+                ->name('store');
+
+            Route::put('/{cartItem}', [CartController::class, 'update'])
+                ->name('update');
+
+            Route::delete('/{cartItem}', [CartController::class, 'destroy'])
+                ->name('destroy');
+        });
 
 
     // Admin
