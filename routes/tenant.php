@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\AdminController;
@@ -43,12 +45,6 @@ Route::middleware([
             ->name('login.store');
     });
 
-    Route::middleware('auth')->group(function () {
-
-        Route::post('/logout', [AuthController::class, 'logout'])
-            ->name('logout');
-    });
-
 
     // Shop
 
@@ -74,6 +70,35 @@ Route::middleware([
             Route::delete('/{cartItem}', [CartController::class, 'destroy'])
                 ->name('destroy');
         });
+
+
+    // Customer Protected Routes
+
+    Route::middleware('auth')->group(function () {
+
+        // Logout
+
+        Route::post('/logout', [AuthController::class, 'logout'])
+            ->name('logout');
+
+
+        // Checkout
+
+        Route::get('/checkout', [CheckoutController::class, 'create'])
+            ->name('checkout.create');
+
+        Route::post('/checkout', [CheckoutController::class, 'store'])
+            ->name('checkout.store');
+
+
+        // Orders
+
+        Route::get('/orders', [OrderController::class, 'index'])
+            ->name('orders.index');
+
+        Route::get('/orders/{order}', [OrderController::class, 'show'])
+            ->name('orders.show');
+    });
 
 
     // Admin
