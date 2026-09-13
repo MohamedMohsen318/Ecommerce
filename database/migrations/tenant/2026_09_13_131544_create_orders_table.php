@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->string('status')->default('pending'); // OrderStatus enum
+            $table->string('status')->default('pending');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('total', 10, 2);
             $table->string('shipping_address', 500);
