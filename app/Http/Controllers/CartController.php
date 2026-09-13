@@ -30,6 +30,11 @@ class CartController extends Controller
         ]);
 
         $item = Item::findOrFail($data['item_id']);
+
+        if ($item->variants()->exists() && empty($data['item_attribute_id'])) {
+            return back()->withErrors(['item_attribute_id' => 'Please choose an option.']);
+        }
+
         $cart = $this->cartService->currentCart(auth()->id(), $request->session()->getId());
 
         $this->cartService->addItem($cart, $item->id, $data['item_attribute_id'] ?? null, $data['quantity']);
