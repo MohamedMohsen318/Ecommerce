@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class AuthService
 {
@@ -16,6 +19,15 @@ class AuthService
         ]);
 
         Auth::login($user);
+
+        try {
+            event(new Registered($user));
+        } catch (Throwable $exception) {
+            Log::warning('Email verification notification could not be sent.', [
+                'user_id' => $user->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
 
         return $user;
     }

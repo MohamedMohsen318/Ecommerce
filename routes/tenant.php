@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -15,6 +17,7 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\ItemController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
@@ -49,6 +52,39 @@ Route::middleware([
         Route::post('/login', [AuthController::class, 'login'])
             ->name('login.store');
     });
+
+
+    // Password Reset
+
+    Route::middleware('guest')->group(function () {
+
+        Route::get('/forgot-password', [PasswordResetController::class, 'showRequestForm'])
+            ->name('password.request');
+
+        Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])
+            ->name('password.email');
+
+        Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])
+            ->name('password.reset');
+
+        Route::post('/reset-password', [PasswordResetController::class, 'reset'])
+            ->name('password.update');
+    });
+
+
+    // Email Verification
+
+    Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
+        ->middleware('auth')
+        ->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->middleware(['auth', 'signed'])
+        ->name('verification.verify');
+
+    Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])
+        ->middleware(['auth', 'throttle:1,1'])
+        ->name('verification.send');
 
 
     // Shop
@@ -131,7 +167,7 @@ Route::middleware([
             ->name('checkout.store');
 
 
-        // Orders
+        // Customer Orders
 
         Route::get('/orders', [OrderController::class, 'index'])
             ->name('orders.index');
@@ -211,6 +247,21 @@ Route::middleware([
 
                     Route::resource('discounts', DiscountController::class)
                         ->except(['show']);
+                });
+
+
+                // Order Management
+
+                Route::middleware('permission:manage_orders,admins')->group(function () {
+
+                    Route::get('/orders', [AdminOrderController::class, 'index'])
+                        ->name('orders.index');
+
+                    Route::get('/orders/{order}', [AdminOrderController::class, 'show'])
+                        ->name('orders.show');
+
+                    Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
+                        ->name('orders.update-status');
                 });
 
 
