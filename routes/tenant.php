@@ -6,11 +6,14 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ShopController;
-use App\Http\Controllers\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ItemController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -51,6 +54,9 @@ Route::middleware([
     Route::get('/shop', [ShopController::class, 'index'])
         ->name('shop.index');
 
+    Route::get('/shop/{item}', [ShopController::class, 'show'])
+        ->name('shop.show');
+
 
     // Cart
 
@@ -80,6 +86,32 @@ Route::middleware([
 
         Route::post('/logout', [AuthController::class, 'logout'])
             ->name('logout');
+
+
+        // Wishlist
+
+        Route::prefix('wishlist')
+            ->name('wishlist.')
+            ->group(function () {
+
+                Route::get('/', [WishlistController::class, 'index'])
+                    ->name('index');
+
+                Route::post('/{item}/toggle', [WishlistController::class, 'toggle'])
+                    ->name('toggle');
+            });
+
+
+        // Reviews
+
+        Route::post('/items/{item}/reviews', [ReviewController::class, 'store'])
+            ->name('reviews.store');
+
+        Route::put('/reviews/{review}', [ReviewController::class, 'update'])
+            ->name('reviews.update');
+
+        Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
+            ->name('reviews.destroy');
 
 
         // Checkout
@@ -162,6 +194,21 @@ Route::middleware([
 
                     Route::resource('items', ItemController::class)
                         ->except(['show']);
+                });
+
+
+                // Review Management
+
+                Route::middleware('permission:manage_reviews,admins')->group(function () {
+
+                    Route::get('/reviews', [AdminReviewController::class, 'index'])
+                        ->name('reviews.index');
+
+                    Route::patch('/reviews/{review}/approve', [AdminReviewController::class, 'approve'])
+                        ->name('reviews.approve');
+
+                    Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])
+                        ->name('reviews.destroy');
                 });
             });
         });
