@@ -77,6 +77,18 @@
         @endif
 
 
+        {{-- Orders --}}
+
+        @if (auth('admins')->user()?->can('manage_orders'))
+            <a
+                href="{{ route('admin.orders.index') }}"
+                class="block rounded-lg px-3 py-2 hover:bg-stone-800 {{ request()->routeIs('admin.orders.*') ? 'bg-stone-800 text-white' : '' }}"
+            >
+                Orders
+            </a>
+        @endif
+
+
         {{-- Reviews --}}
 
         @if (auth('admins')->user()?->can('manage_reviews'))
