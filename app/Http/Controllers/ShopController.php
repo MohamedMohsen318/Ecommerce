@@ -28,6 +28,7 @@ class ShopController extends Controller
         return view('shop.show', [
             'item' => $item->load('translations', 'variants', 'category.translations'),
             'reviews' => $item->reviews()->approved()->with('user')->latest()->get(),
+            'comments' => $item->comments()->with('user', 'replies.user')->latest()->get(),
             'canReview' => auth()->check() && $this->reviewService->canReview(auth()->id(), $item->id),
             'isWishlisted' => auth()->check() && auth()->user()->wishlistedItems()->where('item_id', $item->id)->exists(),
         ]);

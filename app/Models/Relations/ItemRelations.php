@@ -7,6 +7,7 @@ use App\Models\ItemAttribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\ProductReview;
+use App\Models\ProductComment;
 
 trait ItemRelations
 {
@@ -22,5 +23,9 @@ trait ItemRelations
     public function reviews(): HasMany
     {
         return $this->hasMany(ProductReview::class);
+    }
+    public function comments(): HasMany
+    {
+        return $this->hasMany(ProductComment::class)->whereNull('parent_id');
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ShopController;
@@ -112,6 +113,12 @@ Route::middleware([
 
         Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
             ->name('reviews.destroy');
+
+
+        // Comments
+
+        Route::post('/items/{item}/comments', [CommentController::class, 'store'])
+            ->name('comments.store');
 
 
         // Checkout
