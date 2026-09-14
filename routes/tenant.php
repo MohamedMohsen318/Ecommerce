@@ -13,6 +13,7 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use Illuminate\Support\Facades\Route;
@@ -200,6 +201,15 @@ Route::middleware([
                 Route::middleware('permission:manage_items,admins')->group(function () {
 
                     Route::resource('items', ItemController::class)
+                        ->except(['show']);
+                });
+
+
+                // Discount Management
+
+                Route::middleware('permission:manage_discounts,admins')->group(function () {
+
+                    Route::resource('discounts', DiscountController::class)
                         ->except(['show']);
                 });
 

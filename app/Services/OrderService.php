@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\OrderStatus;
 use App\Models\Cart;
+use App\Models\Discount;
 use App\Models\Item;
 use App\Models\ItemAttribute;
 use App\Models\Order;
@@ -11,13 +12,14 @@ use Illuminate\Support\Facades\DB;
 
 class OrderService
 {
-    public function checkout(Cart $cart, int $userId, string $shippingAddress): Order
+
+    public function checkout(Cart $cart, int $userId, string $shippingAddress, ?string $discountCode = null): Order
     {
         if ($cart->items->isEmpty()) {
             throw new \RuntimeException('Your cart is empty.');
         }
 
-        $order = DB::transaction(function () use ($cart, $userId, $shippingAddress) {
+        $order = DB::transaction(function () use ($cart, $userId, $shippingAddress, $discountCode) {
             $itemIds = $cart->items->pluck('item_id')->filter()->unique()->sort()->values();
             $variantIds = $cart->items->pluck('item_attribute_id')->filter()->unique()->sort()->values();
 
@@ -42,7 +44,6 @@ class OrderService
                     throw new \RuntimeException("{$name} doesn't have enough stock left.");
                 }
 
-
                 $unitPrice = (float) $item->price + (float) ($variant?->price_modifier ?? 0);
                 $subtotal += $unitPrice * $cartItem->quantity;
 
@@ -61,11 +62,15 @@ class OrderService
                 }
             }
 
+            [$discount, $discountAmount] = $this->applyDiscount($discountCode, $subtotal);
+
             $order = Order::create([
                 'user_id' => $userId,
+                'discount_id' => $discount?->id,
                 'status' => OrderStatus::Pending,
                 'subtotal' => $subtotal,
-                'total' => $subtotal,
+                'discount_amount' => $discountAmount,
+                'total' => max($subtotal - $discountAmount, 0),
                 'shipping_address' => $shippingAddress,
             ]);
 
@@ -77,5 +82,26 @@ class OrderService
         });
 
         return $order->fresh();
+    }
+
+    /**
+     * @return array{0: ?Discount, 1: float}
+     */
+    protected function applyDiscount(?string $code, float $subtotal): array
+    {
+        if (! $code) {
+            return [null, 0.0];
+        }
+
+        $discount = Discount::query()->where('code', $code)->lockForUpdate()->first();
+
+        if (! $discount || ! $discount->isValid()) {
+            throw new \RuntimeException('This discount code is not valid.');
+        }
+
+        $amount = $discount->amountFor($subtotal);
+        $discount->increment('used_count');
+
+        return [$discount, $amount];
     }
 }

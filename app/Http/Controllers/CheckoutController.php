@@ -23,17 +23,22 @@ class CheckoutController extends Controller
             'cart' => $cart->load('items.item.translations', 'items.variant'),
         ]);
     }
-
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'shipping_address' => ['required', 'string', 'max:500'],
+            'discount_code' => ['nullable', 'string', 'max:50'],
         ]);
 
         $cart = $this->cartService->currentCart(auth()->id(), $request->session()->getId());
 
         try {
-            $order = $this->orderService->checkout($cart, auth()->id(), $data['shipping_address']);
+            $order = $this->orderService->checkout(
+                $cart,
+                auth()->id(),
+                $data['shipping_address'],
+                $data['discount_code'] ?? null,
+            );
         } catch (\RuntimeException $e) {
             return back()->withErrors(['checkout' => $e->getMessage()])->withInput();
         }

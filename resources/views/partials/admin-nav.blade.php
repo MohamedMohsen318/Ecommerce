@@ -1,4 +1,3 @@
-
 <aside class="w-64 shrink-0 border-r border-stone-200 bg-stone-900 text-stone-200">
 
     {{-- Admin Header --}}
@@ -62,6 +61,18 @@
                 class="block rounded-lg px-3 py-2 hover:bg-stone-800 {{ request()->routeIs('admin.items.*') ? 'bg-stone-800 text-white' : '' }}"
             >
                 Items
+            </a>
+        @endif
+
+
+        {{-- Discounts --}}
+
+        @if (auth('admins')->user()?->can('manage_discounts'))
+            <a
+                href="{{ route('admin.discounts.index') }}"
+                class="block rounded-lg px-3 py-2 hover:bg-stone-800 {{ request()->routeIs('admin.discounts.*') ? 'bg-stone-800 text-white' : '' }}"
+            >
+                Discounts
             </a>
         @endif
 
