@@ -11,8 +11,10 @@ class Order extends Model
 {
     use HasFactory, OrderRelations;
 
-    protected $fillable = ['user_id', 'discount_id', 'status', 'subtotal', 'discount_amount', 'total', 'shipping_address'];
-
+    protected $fillable = [
+        'user_id', 'discount_id', 'status', 'subtotal', 'discount_amount',
+        'points_redeemed', 'points_discount_amount', 'total', 'shipping_address',
+    ];
     protected function casts(): array
     {
         return [

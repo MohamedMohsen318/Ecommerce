@@ -20,14 +20,17 @@ class CheckoutController extends Controller
         $cart = $this->cartService->currentCart(auth()->id(), $request->session()->getId());
 
         return view('checkout.create', [
-            'cart' => $cart->load('items.item.translations', 'items.variant'),
+            'cart' => $cart->load('items.item.translations', 'items.item.flashSales', 'items.variant'),
+            'pointsBalance' => auth()->user()->loyaltyPointsBalance(),
         ]);
     }
+
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'shipping_address' => ['required', 'string', 'max:500'],
             'discount_code' => ['nullable', 'string', 'max:50'],
+            'redeem_points' => ['nullable', 'integer', 'min:0'],
         ]);
 
         $cart = $this->cartService->currentCart(auth()->id(), $request->session()->getId());
@@ -38,6 +41,7 @@ class CheckoutController extends Controller
                 auth()->id(),
                 $data['shipping_address'],
                 $data['discount_code'] ?? null,
+                $data['redeem_points'] ?? 0,
             );
         } catch (\RuntimeException $e) {
             return back()->withErrors(['checkout' => $e->getMessage()])->withInput();

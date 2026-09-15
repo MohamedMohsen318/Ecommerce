@@ -136,6 +136,44 @@
             </div>
 
 
+            {{-- Redeem Points --}}
+
+            @if ($pointsBalance > 0)
+
+                <div>
+
+                    <label
+                        for="redeem_points"
+                        class="block text-sm font-medium text-stone-700"
+                    >
+                        Redeem points
+
+                        <span class="text-stone-400">
+                            (you have {{ $pointsBalance }} - 100 points = $1)
+                        </span>
+                    </label>
+
+                    <input
+                        id="redeem_points"
+                        name="redeem_points"
+                        type="number"
+                        min="0"
+                        max="{{ $pointsBalance }}"
+                        value="{{ old('redeem_points', 0) }}"
+                        class="mt-1 block w-full rounded-lg border border-stone-300 focus:border-blue-500 focus:ring-blue-500"
+                    >
+
+                    @error('redeem_points')
+                    <p class="mt-1 text-sm text-red-600">
+                        {{ $message }}
+                    </p>
+                    @enderror
+
+                </div>
+
+            @endif
+
+
             {{-- Place Order --}}
 
             <button

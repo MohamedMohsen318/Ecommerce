@@ -7,6 +7,7 @@
     {{-- Order Header --}}
 
     <div>
+
         <h1 class="font-display text-3xl font-semibold text-stone-900">
             Order #{{ $order->id }}
         </h1>
@@ -15,17 +16,33 @@
             Status:
             {{ $order->status?->label() ?? $order->status }}
         </p>
+
         @if ($canCancel)
-            <form method="POST" action="{{ route('orders.cancel', $order) }}" class="mt-3" onsubmit="return confirm('Cancel this order?')">
-                @csrf @method('PATCH')
-                <button type="submit" class="text-sm text-red-600 hover:underline">Cancel order</button>
+
+            <form
+                method="POST"
+                action="{{ route('orders.cancel', $order) }}"
+                class="mt-3"
+                onsubmit="return confirm('Cancel this order?')"
+            >
+                @csrf
+                @method('PATCH')
+
+                <button
+                    type="submit"
+                    class="text-sm text-red-600 hover:underline"
+                >
+                    Cancel order
+                </button>
             </form>
+
         @endif
 
         <p class="mt-1 text-stone-500">
             Shipping to:
             {{ $order->shipping_address }}
         </p>
+
     </div>
 
 
@@ -77,6 +94,7 @@
         @if ($order->discount_amount > 0)
 
             <div class="flex justify-end text-stone-500">
+
                 Discount
 
                 @if ($order->discount?->code)
@@ -85,6 +103,22 @@
 
                 :
                 -{{ number_format($order->discount_amount, 2) }}
+
+            </div>
+
+        @endif
+
+
+        {{-- Points Discount --}}
+
+        @if ($order->points_discount_amount > 0)
+
+            <div class="mt-2 flex justify-end text-stone-500">
+
+                Points redeemed
+                ({{ $order->points_redeemed }}):
+                -{{ number_format($order->points_discount_amount, 2) }}
+
             </div>
 
         @endif
@@ -93,9 +127,22 @@
         {{-- Total --}}
 
         <div class="flex justify-end text-lg font-semibold text-stone-900">
+
             Total:
             {{ number_format($order->total, 2) }}
+
         </div>
+
+
+        {{-- Earned Points --}}
+
+        <p class="mt-2 text-right text-sm text-stone-400">
+
+            You'll earn
+            {{ (int) floor((float) $order->total) }}
+            points from this order.
+
+        </p>
 
     </div>
 

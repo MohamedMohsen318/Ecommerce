@@ -7,6 +7,7 @@ use App\Events\OrderStatusChanged;
 use App\Models\Admin;
 use App\Models\Item;
 use App\Models\ItemAttribute;
+use App\Models\LoyaltyPointTransaction;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
 
@@ -44,6 +45,7 @@ class OrderStatusService
         DB::transaction(function () use ($order, $newStatus, $admin, $note) {
             if ($newStatus === OrderStatus::Cancelled) {
                 $this->restoreStock($order);
+                $this->reversePoints($order);
             }
 
             $order->update(['status' => $newStatus]);
@@ -68,6 +70,32 @@ class OrderStatusService
             } elseif ($orderItem->item_id) {
                 Item::whereKey($orderItem->item_id)->increment('stock', $orderItem->quantity);
             }
+        }
+    }
+
+    protected function reversePoints(Order $order): void
+    {
+        $earnedTransaction = LoyaltyPointTransaction::query()
+            ->where('order_id', $order->id)
+            ->where('reason', 'order_placed')
+            ->first();
+
+        if ($earnedTransaction) {
+            LoyaltyPointTransaction::create([
+                'user_id' => $order->user_id,
+                'order_id' => $order->id,
+                'points' => -$earnedTransaction->points,
+                'reason' => 'order_cancelled_earned_reversed',
+            ]);
+        }
+
+        if ($order->points_redeemed > 0) {
+            LoyaltyPointTransaction::create([
+                'user_id' => $order->user_id,
+                'order_id' => $order->id,
+                'points' => $order->points_redeemed,
+                'reason' => 'order_cancelled_redeemed_returned',
+            ]);
         }
     }
 }
