@@ -6,7 +6,7 @@ trait CartItemPricing
 {
     public function unitPrice(): float
     {
-        return (float) ($this->item?->price ?? 0) + (float) ($this->variant?->price_modifier ?? 0);
+        return (float) ($this->item?->effectivePrice() ?? 0) + (float) ($this->variant?->price_modifier ?? 0);
     }
 
     public function lineTotal(): float

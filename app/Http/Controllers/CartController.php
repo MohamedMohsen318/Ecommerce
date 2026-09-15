@@ -16,7 +16,7 @@ class CartController extends Controller
     {
         $cart = $this->cartService
             ->currentCart(auth()->id(), $request->session()->getId())
-            ->load('items.item.translations', 'items.variant');
+            ->load('items.item.translations', 'items.item.flashSales', 'items.variant');
 
         return view('cart.index', ['cart' => $cart]);
     }

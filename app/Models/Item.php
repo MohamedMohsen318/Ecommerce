@@ -9,10 +9,11 @@ use App\Models\Traits\ItemScopes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Traits\ItemPricing;
 
 class Item extends Model
 {
-    use HasFactory, HasMedia, HasTranslations, ItemRelations, ItemScopes, SoftDeletes;
+    use HasFactory, HasMedia, HasTranslations, ItemPricing, ItemRelations, ItemScopes, SoftDeletes;
 
     protected $fillable = ['category_id', 'price', 'stock', 'sku', 'is_active'];
 

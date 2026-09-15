@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DiscountController;
+use App\Http\Controllers\Admin\FlashSaleController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
@@ -43,11 +44,14 @@ Route::middleware([
             'locale' => [
                 'required',
                 'string',
-                'in:' . implode(',', array_keys(config('app.supported_locales'))),
+                'in:ar,en',
             ],
         ]);
 
-        session(['locale' => $validated['locale']]);
+        session([
+            'locale' => $validated['locale'],
+        ]);
+
         app()->setLocale($validated['locale']);
 
         return back();
@@ -250,6 +254,14 @@ Route::middleware([
                 Route::middleware('permission:manage_discounts,admins')->group(function () {
 
                     Route::resource('discounts', DiscountController::class)
+                        ->except(['show']);
+                });
+
+                // Flash Sale Management
+
+                Route::middleware('permission:manage_flash_sales,admins')->group(function () {
+
+                    Route::resource('flash-sales', FlashSaleController::class)
                         ->except(['show']);
                 });
 

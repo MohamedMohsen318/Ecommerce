@@ -41,9 +41,14 @@
                 {{ $item->translate()?->name }}
             </h1>
 
-            <p class="mt-2 text-xl font-medium text-stone-900">
-                {{ number_format($item->price, 2) }}
-            </p>
+            @if ($item->effectivePrice() < $item->price)
+                <p class="mt-1">
+                    <span class="text-red-600 font-medium">{{ number_format($item->effectivePrice(), 2) }}</span>
+                    <span class="ml-1 text-sm text-stone-400 line-through">{{ number_format($item->price, 2) }}</span>
+                </p>
+            @else
+                <p class="mt-1 text-stone-500">{{ number_format($item->price, 2) }}</p>
+            @endif
 
             <p class="mt-4 text-stone-600">
                 {{ $item->translate()?->description }}

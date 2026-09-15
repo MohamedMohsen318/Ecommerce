@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\ProductReview;
 use App\Models\ProductComment;
+use App\Models\FlashSale;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 trait ItemRelations
 {
@@ -27,5 +29,9 @@ trait ItemRelations
     public function comments(): HasMany
     {
         return $this->hasMany(ProductComment::class)->whereNull('parent_id');
+    }
+    public function flashSales(): BelongsToMany
+    {
+        return $this->belongsToMany(FlashSale::class, 'flash_sale_items')->withPivot('sale_price')->withTimestamps();
     }
 }

@@ -23,7 +23,7 @@ class OrderService
             $itemIds = $cart->items->pluck('item_id')->filter()->unique()->sort()->values();
             $variantIds = $cart->items->pluck('item_attribute_id')->filter()->unique()->sort()->values();
 
-            $lockedItems = Item::query()->whereIn('id', $itemIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $lockedItems = Item::query()->whereIn('id', $itemIds)->orderBy('id')->lockForUpdate()->with('flashSales')->get()->keyBy('id');
             $lockedVariants = ItemAttribute::query()->whereIn('id', $variantIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
 
             $subtotal = 0;
@@ -48,7 +48,7 @@ class OrderService
                     throw new \RuntimeException("{$name} doesn't have enough stock left.");
                 }
 
-                $unitPrice = (float) $item->price + (float) ($variant?->price_modifier ?? 0);
+                $unitPrice = $item->effectivePrice() + (float) ($variant?->price_modifier ?? 0);
                 $subtotal += $unitPrice * $cartItem->quantity;
 
                 $orderItemsData[] = [
