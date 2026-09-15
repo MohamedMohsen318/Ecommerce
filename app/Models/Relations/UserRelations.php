@@ -7,6 +7,7 @@ use App\Models\Order;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\LoyaltyPointTransaction;
+use App\Models\Address;
 
 trait UserRelations
 {
@@ -22,5 +23,9 @@ trait UserRelations
     public function loyaltyPointTransactions(): HasMany
     {
         return $this->hasMany(LoyaltyPointTransaction::class);
+    }
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
     }
 }

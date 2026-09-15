@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\AuthController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\WishlistController;
+
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -20,8 +22,10 @@ use App\Http\Controllers\Admin\FlashSaleController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
@@ -40,6 +44,7 @@ Route::middleware([
     // Locale
 
     Route::post('/locale', function (Request $request) {
+
         $validated = $request->validate([
             'locale' => [
                 'required',
@@ -143,6 +148,25 @@ Route::middleware([
         Route::post('/logout', [AuthController::class, 'logout'])
             ->name('logout');
 
+        // Addresses
+
+        Route::prefix('addresses')
+            ->name('addresses.')
+            ->group(function () {
+
+                Route::get('/', [AddressController::class, 'index'])
+                    ->name('index');
+
+                Route::post('/', [AddressController::class, 'store'])
+                    ->name('store');
+
+                Route::patch('/{address}', [AddressController::class, 'update'])
+                    ->name('update');
+
+                Route::delete('/{address}', [AddressController::class, 'destroy'])
+                    ->name('destroy');
+            });
+
         // Wishlist
 
         Route::prefix('wishlist')
@@ -229,40 +253,115 @@ Route::middleware([
 
                 Route::middleware('permission:manage_admins,admins')->group(function () {
 
-                    Route::resource('admins', AdminController::class)
-                        ->except(['show']);
+                    Route::get('/admins', [AdminController::class, 'index'])
+                        ->name('admins.index');
+
+                    Route::get('/admins/create', [AdminController::class, 'create'])
+                        ->name('admins.create');
+
+                    Route::post('/admins', [AdminController::class, 'store'])
+                        ->name('admins.store');
+
+                    Route::get('/admins/{admin}/edit', [AdminController::class, 'edit'])
+                        ->name('admins.edit');
+
+                    Route::put('/admins/{admin}', [AdminController::class, 'update'])
+                        ->name('admins.update');
+
+                    Route::delete('/admins/{admin}', [AdminController::class, 'destroy'])
+                        ->name('admins.destroy');
                 });
 
                 // Category Management
 
                 Route::middleware('permission:manage_categories,admins')->group(function () {
 
-                    Route::resource('categories', CategoryController::class)
-                        ->except(['show']);
+                    Route::get('/categories', [CategoryController::class, 'index'])
+                        ->name('categories.index');
+
+                    Route::get('/categories/create', [CategoryController::class, 'create'])
+                        ->name('categories.create');
+
+                    Route::post('/categories', [CategoryController::class, 'store'])
+                        ->name('categories.store');
+
+                    Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])
+                        ->name('categories.edit');
+
+                    Route::put('/categories/{category}', [CategoryController::class, 'update'])
+                        ->name('categories.update');
+
+                    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])
+                        ->name('categories.destroy');
                 });
 
                 // Item Management
 
                 Route::middleware('permission:manage_items,admins')->group(function () {
 
-                    Route::resource('items', ItemController::class)
-                        ->except(['show']);
+                    Route::get('/items', [ItemController::class, 'index'])
+                        ->name('items.index');
+
+                    Route::get('/items/create', [ItemController::class, 'create'])
+                        ->name('items.create');
+
+                    Route::post('/items', [ItemController::class, 'store'])
+                        ->name('items.store');
+
+                    Route::get('/items/{item}/edit', [ItemController::class, 'edit'])
+                        ->name('items.edit');
+
+                    Route::put('/items/{item}', [ItemController::class, 'update'])
+                        ->name('items.update');
+
+                    Route::delete('/items/{item}', [ItemController::class, 'destroy'])
+                        ->name('items.destroy');
                 });
 
                 // Discount Management
 
                 Route::middleware('permission:manage_discounts,admins')->group(function () {
 
-                    Route::resource('discounts', DiscountController::class)
-                        ->except(['show']);
+                    Route::get('/discounts', [DiscountController::class, 'index'])
+                        ->name('discounts.index');
+
+                    Route::get('/discounts/create', [DiscountController::class, 'create'])
+                        ->name('discounts.create');
+
+                    Route::post('/discounts', [DiscountController::class, 'store'])
+                        ->name('discounts.store');
+
+                    Route::get('/discounts/{discount}/edit', [DiscountController::class, 'edit'])
+                        ->name('discounts.edit');
+
+                    Route::put('/discounts/{discount}', [DiscountController::class, 'update'])
+                        ->name('discounts.update');
+
+                    Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])
+                        ->name('discounts.destroy');
                 });
 
                 // Flash Sale Management
 
                 Route::middleware('permission:manage_flash_sales,admins')->group(function () {
 
-                    Route::resource('flash-sales', FlashSaleController::class)
-                        ->except(['show']);
+                    Route::get('/flash-sales', [FlashSaleController::class, 'index'])
+                        ->name('flash-sales.index');
+
+                    Route::get('/flash-sales/create', [FlashSaleController::class, 'create'])
+                        ->name('flash-sales.create');
+
+                    Route::post('/flash-sales', [FlashSaleController::class, 'store'])
+                        ->name('flash-sales.store');
+
+                    Route::get('/flash-sales/{flashSale}/edit', [FlashSaleController::class, 'edit'])
+                        ->name('flash-sales.edit');
+
+                    Route::put('/flash-sales/{flashSale}', [FlashSaleController::class, 'update'])
+                        ->name('flash-sales.update');
+
+                    Route::delete('/flash-sales/{flashSale}', [FlashSaleController::class, 'destroy'])
+                        ->name('flash-sales.destroy');
                 });
 
                 // Order Management
@@ -295,3 +394,5 @@ Route::middleware([
             });
         });
 });
+
+

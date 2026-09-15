@@ -1,6 +1,7 @@
-
 <nav class="border-b border-stone-200 bg-white px-4 py-3 sm:px-6 lg:px-8">
     <div class="mx-auto flex max-w-7xl items-center justify-between">
+
+        {{-- Logo --}}
 
         <a
             href="{{ route('home') }}"
@@ -9,9 +10,14 @@
             {{ config('app.name') }}
         </a>
 
-
         <div class="flex items-center gap-4 text-sm">
-            <form method="POST" action="{{ route('locale.update') }}">
+
+            {{-- Locale --}}
+
+            <form
+                method="POST"
+                action="{{ route('locale.update') }}"
+            >
                 @csrf
 
                 <select
@@ -21,7 +27,10 @@
                     aria-label="Language"
                 >
                     @foreach (config('app.supported_locales') as $locale => $language)
-                        <option value="{{ $locale }}" @selected(app()->getLocale() === $locale)>
+                        <option
+                            value="{{ $locale }}"
+                            @selected(app()->getLocale() === $locale)
+                        >
                             {{ $language['native'] }}
                         </option>
                     @endforeach
@@ -37,7 +46,6 @@
                 Shop
             </a>
 
-
             {{-- Cart --}}
 
             <a
@@ -46,7 +54,6 @@
             >
                 Cart
             </a>
-
 
             @auth
 
@@ -59,13 +66,20 @@
                     Wishlist
                 </a>
 
+                {{-- Addresses --}}
+
+                <a
+                    href="{{ route('addresses.index') }}"
+                    class="text-stone-600 hover:text-brand-600"
+                >
+                    Addresses
+                </a>
 
                 {{-- User --}}
 
                 <span class="text-stone-600">
                     أهلاً، {{ auth()->user()->name }}
                 </span>
-
 
                 {{-- Logout --}}
 
@@ -93,7 +107,6 @@
                 >
                     {{ __('auth.nav_login') }}
                 </a>
-
 
                 {{-- Register --}}
 

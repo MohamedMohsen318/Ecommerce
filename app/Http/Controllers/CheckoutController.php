@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Address;
+use App\Services\AddressService;
 use App\Services\CartService;
 use App\Services\OrderService;
 use Illuminate\Http\RedirectResponse;
@@ -13,6 +15,7 @@ class CheckoutController extends Controller
     public function __construct(
         private CartService $cartService,
         private OrderService $orderService,
+        private AddressService $addressService,
     ) {}
 
     public function create(Request $request): View
@@ -21,6 +24,7 @@ class CheckoutController extends Controller
 
         return view('checkout.create', [
             'cart' => $cart->load('items.item.translations', 'items.item.flashSales', 'items.variant'),
+            'addresses' => auth()->user()->addresses()->latest()->get(),
             'pointsBalance' => auth()->user()->loyaltyPointsBalance(),
         ]);
     }
@@ -28,10 +32,24 @@ class CheckoutController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'shipping_address' => ['required', 'string', 'max:500'],
+            'address_choice' => ['required', 'string'],
+            'shipping_address' => ['required_if:address_choice,new', 'nullable', 'string', 'max:500'],
+            'save_address' => ['sometimes', 'boolean'],
             'discount_code' => ['nullable', 'string', 'max:50'],
             'redeem_points' => ['nullable', 'integer', 'min:0'],
         ]);
+
+        $shippingAddress = $data['address_choice'] === 'new'
+            ? $data['shipping_address']
+            : Address::query()->where('user_id', auth()->id())->find($data['address_choice'])?->line;
+
+        if (! $shippingAddress) {
+            return back()->withErrors(['shipping_address' => 'Please choose or enter a shipping address.'])->withInput();
+        }
+
+        if ($data['address_choice'] === 'new' && $request->boolean('save_address')) {
+            $this->addressService->create(auth()->id(), ['line' => $shippingAddress]);
+        }
 
         $cart = $this->cartService->currentCart(auth()->id(), $request->session()->getId());
 
@@ -39,7 +57,7 @@ class CheckoutController extends Controller
             $order = $this->orderService->checkout(
                 $cart,
                 auth()->id(),
-                $data['shipping_address'],
+                $shippingAddress,
                 $data['discount_code'] ?? null,
                 $data['redeem_points'] ?? 0,
             );
