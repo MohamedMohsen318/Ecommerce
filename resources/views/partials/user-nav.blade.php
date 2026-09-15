@@ -11,6 +11,22 @@
 
 
         <div class="flex items-center gap-4 text-sm">
+            <form method="POST" action="{{ route('locale.update') }}">
+                @csrf
+
+                <select
+                    name="locale"
+                    onchange="this.form.submit()"
+                    class="rounded-lg border border-stone-300 bg-white px-2 py-1 text-sm text-stone-600 focus:border-brand-500 focus:ring-brand-500"
+                    aria-label="Language"
+                >
+                    @foreach (config('app.supported_locales') as $locale => $language)
+                        <option value="{{ $locale }}" @selected(app()->getLocale() === $locale)>
+                            {{ $language['native'] }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
 
             {{-- Shop --}}
 

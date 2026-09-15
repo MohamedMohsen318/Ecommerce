@@ -23,7 +23,7 @@
                     value="{{ old('email') }}"
                     required
                     autofocus
-                    class="mt-1 block w-full rounded-lg border border-stone-300 px-3 py-2.5 focus:border-blue-500 focus:ring-blue-500"
+                    class="mt-1 block w-full rounded-lg border border-stone-300 px-3 py-2.5 focus:border-brand-500 focus:ring-brand-500"
                 >
 
                 @error('email')
@@ -41,7 +41,7 @@
                     name="password"
                     type="password"
                     required
-                    class="mt-1 block w-full rounded-lg border border-stone-300 px-3 py-2.5 focus:border-blue-500 focus:ring-blue-500"
+                    class="mt-1 block w-full rounded-lg border border-stone-300 px-3 py-2.5 focus:border-brand-500 focus:ring-brand-500"
                 >
 
                 @error('password')
@@ -54,7 +54,7 @@
                     type="checkbox"
                     name="remember"
                     value="1"
-                    class="rounded border-stone-300 text-blue-600 focus:ring-blue-500"
+                    class="rounded border-stone-300 text-brand-600 focus:ring-brand-500"
                 >
 
                 {{ __('auth.remember_me') }}
@@ -62,11 +62,10 @@
 
             <button
                 type="submit"
-                class="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                class="w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
             >
                 {{ __('auth.login_button') }}
             </button>
         </form>
     </div>
 @endsection
-

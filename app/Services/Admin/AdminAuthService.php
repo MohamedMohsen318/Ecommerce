@@ -6,12 +6,12 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminAuthService
 {
-    public function login(array $credentials): bool
+    public function login(array $credentials, bool $remember = false): bool
     {
         return Auth::guard('admins')->attempt([
             'email' => $credentials['email'],
             'password' => $credentials['password'],
-        ]);
+        ], $remember);
     }
 
     public function logout(): void

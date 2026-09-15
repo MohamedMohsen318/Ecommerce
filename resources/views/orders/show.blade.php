@@ -15,6 +15,12 @@
             Status:
             {{ $order->status?->label() ?? $order->status }}
         </p>
+        @if ($canCancel)
+            <form method="POST" action="{{ route('orders.cancel', $order) }}" class="mt-3" onsubmit="return confirm('Cancel this order?')">
+                @csrf @method('PATCH')
+                <button type="submit" class="text-sm text-red-600 hover:underline">Cancel order</button>
+            </form>
+        @endif
 
         <p class="mt-1 text-stone-500">
             Shipping to:

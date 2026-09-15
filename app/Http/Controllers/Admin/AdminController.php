@@ -52,7 +52,11 @@ class AdminController extends Controller
 
     public function destroy(Admin $admin): RedirectResponse
     {
-        $this->adminService->delete($admin, auth('admins')->user());
+        try {
+            $this->adminService->delete($admin, auth('admins')->user());
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['admin' => $e->getMessage()]);
+        }
 
         return redirect()->route('admin.admins.index')->with('success', 'Admin deleted.');
     }

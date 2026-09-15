@@ -15,7 +15,7 @@ class ShopController extends Controller
         $items = Item::query()
             ->active()
             ->inStock()
-            ->with(['category.translations', 'translations', 'variants'])
+            ->with(['category.translations', 'translations', 'variants', 'media'])
             ->paginate(12);
 
         return view('shop.index', ['items' => $items]);

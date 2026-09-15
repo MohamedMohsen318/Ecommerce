@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -35,6 +36,22 @@ Route::middleware([
         return view('welcome');
     })->name('home');
 
+    // Locale
+
+    Route::post('/locale', function (Request $request) {
+        $validated = $request->validate([
+            'locale' => [
+                'required',
+                'string',
+                'in:' . implode(',', array_keys(config('app.supported_locales'))),
+            ],
+        ]);
+
+        session(['locale' => $validated['locale']]);
+        app()->setLocale($validated['locale']);
+
+        return back();
+    })->name('locale.update');
 
     // Customer Authentication
 
@@ -53,7 +70,6 @@ Route::middleware([
             ->name('login.store');
     });
 
-
     // Password Reset
 
     Route::middleware('guest')->group(function () {
@@ -71,21 +87,21 @@ Route::middleware([
             ->name('password.update');
     });
 
-
     // Email Verification
 
-    Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
-        ->middleware('auth')
-        ->name('verification.notice');
+    Route::middleware('auth')->group(function () {
+
+        Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
+            ->name('verification.notice');
+
+        Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])
+            ->middleware('throttle:1,1')
+            ->name('verification.send');
+    });
 
     Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
         ->middleware(['auth', 'signed'])
         ->name('verification.verify');
-
-    Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])
-        ->middleware(['auth', 'throttle:1,1'])
-        ->name('verification.send');
-
 
     // Shop
 
@@ -94,7 +110,6 @@ Route::middleware([
 
     Route::get('/shop/{item}', [ShopController::class, 'show'])
         ->name('shop.show');
-
 
     // Cart
 
@@ -115,7 +130,6 @@ Route::middleware([
                 ->name('destroy');
         });
 
-
     // Customer Protected Routes
 
     Route::middleware('auth')->group(function () {
@@ -124,7 +138,6 @@ Route::middleware([
 
         Route::post('/logout', [AuthController::class, 'logout'])
             ->name('logout');
-
 
         // Wishlist
 
@@ -139,24 +152,20 @@ Route::middleware([
                     ->name('toggle');
             });
 
-
         // Reviews
 
         Route::post('/items/{item}/reviews', [ReviewController::class, 'store'])
             ->name('reviews.store');
 
-        Route::put('/reviews/{review}', [ReviewController::class, 'update'])
-            ->name('reviews.update');
-
-        Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
-            ->name('reviews.destroy');
-
-
         // Comments
 
         Route::post('/items/{item}/comments', [CommentController::class, 'store'])
             ->name('comments.store');
+    });
 
+    // Customer Verified Routes
+
+    Route::middleware(['auth', 'verified'])->group(function () {
 
         // Checkout
 
@@ -166,7 +175,6 @@ Route::middleware([
         Route::post('/checkout', [CheckoutController::class, 'store'])
             ->name('checkout.store');
 
-
         // Customer Orders
 
         Route::get('/orders', [OrderController::class, 'index'])
@@ -174,8 +182,10 @@ Route::middleware([
 
         Route::get('/orders/{order}', [OrderController::class, 'show'])
             ->name('orders.show');
-    });
 
+        Route::patch('/orders/{order}/cancel', [OrderController::class, 'cancel'])
+            ->name('orders.cancel');
+    });
 
     // Admin
 
@@ -194,7 +204,6 @@ Route::middleware([
                     ->name('login.store');
             });
 
-
             // Admin Protected Routes
 
             Route::middleware('auth:admins')->group(function () {
@@ -204,7 +213,6 @@ Route::middleware([
                 Route::post('/logout', [AdminAuthController::class, 'logout'])
                     ->name('logout');
 
-
                 // Dashboard
 
                 Route::middleware('permission:view_dashboard,admins')
@@ -212,7 +220,6 @@ Route::middleware([
                         return view('admin.dashboard');
                     })
                     ->name('dashboard.index');
-
 
                 // Admin Management
 
@@ -222,7 +229,6 @@ Route::middleware([
                         ->except(['show']);
                 });
 
-
                 // Category Management
 
                 Route::middleware('permission:manage_categories,admins')->group(function () {
@@ -230,7 +236,6 @@ Route::middleware([
                     Route::resource('categories', CategoryController::class)
                         ->except(['show']);
                 });
-
 
                 // Item Management
 
@@ -240,7 +245,6 @@ Route::middleware([
                         ->except(['show']);
                 });
 
-
                 // Discount Management
 
                 Route::middleware('permission:manage_discounts,admins')->group(function () {
@@ -248,7 +252,6 @@ Route::middleware([
                     Route::resource('discounts', DiscountController::class)
                         ->except(['show']);
                 });
-
 
                 // Order Management
 
@@ -263,7 +266,6 @@ Route::middleware([
                     Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
                         ->name('orders.update-status');
                 });
-
 
                 // Review Management
 

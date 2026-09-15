@@ -19,7 +19,7 @@
             <tbody class="divide-y divide-stone-100">
             @forelse ($reviews as $review)
                 <tr>
-                    <td class="px-4 py-3 font-medium text-stone-900">{{ $review->item->translate('en')?->name }}</td>
+                    <td class="px-4 py-3 font-medium text-stone-900">{{ $review->item->translate()?->name }}</td>
                     <td class="px-4 py-3 text-stone-600">{{ $review->user->name }}</td>
                     <td class="px-4 py-3 text-stone-600">{{ $review->rating }}/5</td>
                     <td class="px-4 py-3">

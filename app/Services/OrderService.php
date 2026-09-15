@@ -37,10 +37,14 @@ class OrderService
                 }
 
                 $variant = $cartItem->item_attribute_id ? $lockedVariants->get($cartItem->item_attribute_id) : null;
+
+                if ($cartItem->item_attribute_id && (! $variant || $variant->item_id !== $item->id)) {
+                    throw new \RuntimeException('Something in your cart is no longer valid. Please review your cart.');
+                }
                 $availableStock = $variant ? $variant->stock : $item->stock;
 
                 if ($availableStock < $cartItem->quantity) {
-                    $name = $item->translate('en')?->name ?? 'This item';
+                    $name = $item->translate()?->name ?? 'This item';
                     throw new \RuntimeException("{$name} doesn't have enough stock left.");
                 }
 
@@ -50,7 +54,7 @@ class OrderService
                 $orderItemsData[] = [
                     'item_id' => $item->id,
                     'item_attribute_id' => $variant?->id,
-                    'item_name' => $item->translate('en')?->name ?? 'Item',
+                    'item_name' => $item->translate()?->name ?? 'Item',
                     'unit_price' => $unitPrice,
                     'quantity' => $cartItem->quantity,
                 ];
@@ -93,8 +97,7 @@ class OrderService
             return [null, 0.0];
         }
 
-        $discount = Discount::query()->where('code', $code)->lockForUpdate()->first();
-
+        $discount = Discount::query()->where('code', strtoupper($code))->lockForUpdate()->first();
         if (! $discount || ! $discount->isValid()) {
             throw new \RuntimeException('This discount code is not valid.');
         }

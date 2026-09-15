@@ -26,8 +26,8 @@
             <tbody class="divide-y divide-stone-100">
             @forelse ($categories as $category)
                 <tr>
-                    <td class="px-4 py-3 font-medium text-stone-900">{{ $category->translate('en')?->name ?? '—' }}</td>
-                    <td class="px-4 py-3 text-stone-600">{{ $category->parent?->translate('en')?->name ?? '—' }}</td>
+                    <td class="px-4 py-3 font-medium text-stone-900">{{ $category->translate()?->name ?? '—' }}</td>
+                    <td class="px-4 py-3 text-stone-600">{{ $category->parent?->translate()?->name ?? '—' }}</td>
                     <td class="px-4 py-3">
                         <span class="rounded-full px-2 py-0.5 text-xs {{ $category->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-500' }}">
                             {{ $category->is_active ? 'Active' : 'Inactive' }}

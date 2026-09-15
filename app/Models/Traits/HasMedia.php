@@ -32,6 +32,12 @@ trait HasMedia
     {
         $type = $type instanceof MediaType ? $type->value : $type;
 
+        $existing = $this->media()->where('type', $type)->first();
+
+        if ($existing) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($existing->file);
+        }
+
         $this->media()->updateOrCreate(
             ['type' => $type],
             ['file' => $file->store($path, 'public')]

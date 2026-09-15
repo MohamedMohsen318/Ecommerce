@@ -88,11 +88,8 @@ class ItemService
                 'stock' => $variant['stock'] ?? 0,
             ];
 
-            $existing = ! empty($variant['id'])
-                ? $item->variants()->whereKey($variant['id'])->first()
-                : null;
-
-            if ($existing) {
+            if (! empty($variant['id'])) {
+                $existing = $item->variants()->whereKey($variant['id'])->firstOrFail();
                 $existing->update($attributes);
                 $keptIds[] = $existing->id;
             } else {

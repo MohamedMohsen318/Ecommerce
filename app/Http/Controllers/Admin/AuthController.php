@@ -20,7 +20,7 @@ class AuthController extends Controller
 
     public function login(AdminLoginRequest $request): RedirectResponse
     {
-        if (! $this->authService->login($request->validated())) {
+        if (! $this->authService->login($request->validated(), $request->boolean('remember'))) {
             return back()
                 ->withErrors(['email' => __('auth.invalid_credentials')])
                 ->onlyInput('email');

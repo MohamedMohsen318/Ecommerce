@@ -45,7 +45,7 @@ class ReviewService
     {
         return OrderItem::query()
             ->where('item_id', $itemId)
-            ->whereHas('order', fn ($q) => $q->where('user_id', $userId)->where('status', '!=', OrderStatus::Cancelled))
+            ->whereHas('order', fn ($q) => $q->where('user_id', $userId)->where('status', OrderStatus::Delivered))
             ->value('order_id');
     }
 }

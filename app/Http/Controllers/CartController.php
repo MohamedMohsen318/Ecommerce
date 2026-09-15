@@ -20,7 +20,6 @@ class CartController extends Controller
 
         return view('cart.index', ['cart' => $cart]);
     }
-
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
@@ -31,16 +30,20 @@ class CartController extends Controller
 
         $item = Item::findOrFail($data['item_id']);
 
+        if (! empty($data['item_attribute_id']) && ! $item->variants()->whereKey($data['item_attribute_id'])->exists()) {
+            return back()->withErrors(['item_attribute_id' => 'Invalid option for this item.']);
+        }
+
         if ($item->variants()->exists() && empty($data['item_attribute_id'])) {
             return back()->withErrors(['item_attribute_id' => 'Please choose an option.']);
         }
 
         $cart = $this->cartService->currentCart(auth()->id(), $request->session()->getId());
-
         $this->cartService->addItem($cart, $item->id, $data['item_attribute_id'] ?? null, $data['quantity']);
 
         return back()->with('success', 'Added to cart.');
     }
+
 
     public function update(Request $request, int $cartItem): RedirectResponse
     {

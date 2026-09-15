@@ -9,15 +9,15 @@
             <option value="">— None (top level) —</option>
             @foreach ($parents as $parent)
                 <option value="{{ $parent->id }}" @selected(old('parent_id', $category->parent_id ?? null) == $parent->id)>
-                    {{ $parent->translate('en')?->name }}
-                    @if ($parent->parent) ({{ $parent->parent->translate('en')?->name }}) @endif
+                    {{ $parent->translate()?->name }}
+                    @if ($parent->parent) ({{ $parent->parent->translate()?->name }}) @endif
                 </option>
             @endforeach
         </select>
         @error('parent_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
     </div>
 
-    @php $existing = isset($category) ? $category->translate('en') : null; @endphp
+    @php $existing = isset($category) ? $category->translate() : null; @endphp
     <div>
         <label for="name_en" class="block text-sm font-medium text-stone-700">Name (English)</label>
         <input id="name_en" name="translations[en][name]" type="text"

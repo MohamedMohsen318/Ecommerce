@@ -26,8 +26,8 @@
             <tbody class="divide-y divide-stone-100">
             @forelse ($items as $item)
                 <tr>
-                    <td class="px-4 py-3 font-medium text-stone-900">{{ $item->translate('en')?->name ?? '—' }}</td>
-                    <td class="px-4 py-3 text-stone-600">{{ $item->category?->translate('en')?->name ?? '—' }}</td>
+                    <td class="px-4 py-3 font-medium text-stone-900">{{ $item->translate()?->name ?? '—' }}</td>
+                    <td class="px-4 py-3 text-stone-600">{{ $item->category?->translate()?->name ?? '—' }}</td>
                     <td class="px-4 py-3 text-stone-600">{{ number_format($item->price, 2) }}</td>
                     <td class="px-4 py-3 text-stone-600">{{ $item->stock }}</td>
                     <td class="px-4 py-3">

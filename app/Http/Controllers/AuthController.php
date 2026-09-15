@@ -28,8 +28,9 @@ class AuthController extends Controller
 
         $this->cartService->mergeGuestCartIntoUser($guestSessionId, $user->id);
 
-        return redirect()->route('home')
-            ->with('success', __('auth.account_created'));
+        $request->session()->regenerate();
+
+        return redirect()->route('home')->with('success', __('auth.account_created'));
     }
 
     public function showLogin()

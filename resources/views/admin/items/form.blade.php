@@ -9,14 +9,14 @@
             <option value="">— Uncategorized —</option>
             @foreach ($categories as $category)
                 <option value="{{ $category->id }}" @selected(old('category_id', $item->category_id ?? null) == $category->id)>
-                    {{ $category->translate('en')?->name }}
+                    {{ $category->translate()?->name }}
                 </option>
             @endforeach
         </select>
         @error('category_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
     </div>
 
-    @php $existing = isset($item) ? $item->translate('en') : null; @endphp
+    @php $existing = isset($item) ? $item->translate() : null; @endphp
     <div>
         <label for="name_en" class="block text-sm font-medium text-stone-700">Name</label>
         <input id="name_en" name="translations[en][name]" type="text"
@@ -29,6 +29,19 @@
         <label for="description_en" class="block text-sm font-medium text-stone-700">Description</label>
         <textarea id="description_en" name="translations[en][description]" rows="3"
                   class="mt-1 block w-full rounded-lg border-stone-300 focus:border-brand-500 focus:ring-brand-500">{{ old('translations.en.description', $existing?->description) }}</textarea>
+    </div>
+    @php $existingAr = isset($item) ? $item->translate('ar') : null; @endphp
+    <div>
+        <label for="name_ar" class="block text-sm font-medium text-stone-700">Name (Arabic, optional)</label>
+        <input id="name_ar" name="translations[ar][name]" type="text" dir="rtl"
+               value="{{ old('translations.ar.name', $existingAr?->name) }}"
+               class="mt-1 block w-full rounded-lg border-stone-300 focus:border-brand-500 focus:ring-brand-500">
+    </div>
+
+    <div>
+        <label for="description_ar" class="block text-sm font-medium text-stone-700">Description (Arabic, optional)</label>
+        <textarea id="description_ar" name="translations[ar][description]" rows="3" dir="rtl"
+                  class="mt-1 block w-full rounded-lg border-stone-300 focus:border-brand-500 focus:ring-brand-500">{{ old('translations.ar.description', $existingAr?->description) }}</textarea>
     </div>
 
     <div class="grid grid-cols-2 gap-4">
@@ -101,4 +114,5 @@
     <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2.5 font-medium text-white hover:bg-brand-700">
         {{ isset($item) ? 'Save changes' : 'Create item' }}
     </button>
+
 </div>

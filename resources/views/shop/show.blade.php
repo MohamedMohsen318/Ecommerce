@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $item->translate('en')?->name)
+@section('title', $item->translate()?->name)
 
 @section('content')
 
@@ -16,7 +16,7 @@
                 <img
                     src="{{ $item->getFirstImageUrl() }}"
                     class="w-full rounded-xl object-cover"
-                    alt="{{ $item->translate('en')?->name }}"
+                    alt="{{ $item->translate()?->name }}"
                 >
 
             @else
@@ -34,11 +34,11 @@
         <div>
 
             <p class="text-sm text-stone-500">
-                {{ $item->category?->translate('en')?->name }}
+                {{ $item->category?->translate()?->name }}
             </p>
 
             <h1 class="mt-1 font-display text-3xl font-semibold text-stone-900">
-                {{ $item->translate('en')?->name }}
+                {{ $item->translate()?->name }}
             </h1>
 
             <p class="mt-2 text-xl font-medium text-stone-900">
@@ -46,7 +46,7 @@
             </p>
 
             <p class="mt-4 text-stone-600">
-                {{ $item->translate('en')?->description }}
+                {{ $item->translate()?->description }}
             </p>
 
 

@@ -25,7 +25,7 @@
                         <img
                             src="{{ $item->getFirstImageUrl() }}"
                             class="h-40 w-full object-cover"
-                            alt="{{ $item->translate('en')?->name }}"
+                            alt="{{ $item->translate()?->name }}"
                         >
 
                     @else
@@ -49,7 +49,7 @@
                             href="{{ route('shop.show', $item) }}"
                             class="hover:text-blue-600"
                         >
-                            {{ $item->translate('en')?->name }}
+                            {{ $item->translate()?->name }}
                         </a>
 
                     </h3>

@@ -25,5 +25,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'guard_name' => AuthGuard::Admins->value,
         ]);
         $superAdmin->syncPermissions(PermissionEnum::values());
+
+
+        Role::firstOrCreate([
+            'name' => RoleEnum::Support->value,
+            'guard_name' => AuthGuard::Admins->value,
+        ]);
     }
 }

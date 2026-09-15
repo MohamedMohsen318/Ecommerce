@@ -12,7 +12,7 @@
                     <img src="{{ $item->getFirstImageUrl() }}" class="h-40 w-full object-cover" alt="">
                 @endif
                 <div class="p-4">
-                    <h3 class="font-medium text-stone-900">{{ $item->translate('en')?->name }}</h3>
+                    <h3 class="font-medium text-stone-900">{{ $item->translate()?->name }}</h3>
                     <p class="mt-1 text-stone-500">{{ number_format($item->price, 2) }}</p>
                 </div>
             </a>

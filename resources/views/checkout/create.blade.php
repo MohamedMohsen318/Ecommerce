@@ -31,7 +31,7 @@
                     <div>
 
                         <p class="font-medium text-stone-900">
-                            {{ $cartItem->item?->translate('en')?->name }}
+                            {{ $cartItem->item?->translate()?->name }}
                         </p>
 
                         @if ($cartItem->variant)
