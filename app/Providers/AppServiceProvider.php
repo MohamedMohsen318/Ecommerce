@@ -10,6 +10,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
+use App\Events\OrderStatusChanged;
+use App\Listeners\NotifyCustomerOfStatusChange;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Event::listen(Registered::class, SendEmailVerificationNotification::class);
+        Event::listen(OrderStatusChanged::class, NotifyCustomerOfStatusChange::class);
 
         VerifyEmail::createUrlUsing(function ($notifiable): string {
             if (! app()->runningInConsole() && request()) {

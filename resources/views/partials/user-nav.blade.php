@@ -41,7 +41,7 @@
 
             <a
                 href="{{ route('shop.index') }}"
-                class="text-stone-600 hover:text-blue-600"
+                class="text-stone-600 hover:text-brand-600"
             >
                 Shop
             </a>
@@ -50,7 +50,7 @@
 
             <a
                 href="{{ route('cart.index') }}"
-                class="text-stone-600 hover:text-blue-600"
+                class="text-stone-600 hover:text-brand-600"
             >
                 Cart
             </a>
@@ -61,7 +61,7 @@
 
                 <a
                     href="{{ route('wishlist.index') }}"
-                    class="text-stone-600 hover:text-blue-600"
+                    class="text-stone-600 hover:text-brand-600"
                 >
                     Wishlist
                 </a>
@@ -73,6 +73,29 @@
                     class="text-stone-600 hover:text-brand-600"
                 >
                     Addresses
+                </a>
+
+                {{-- Notifications --}}
+
+                @php
+                    $unreadCount = auth()->user()
+                        ->unreadNotifications()
+                        ->count();
+                @endphp
+
+                <a
+                    href="{{ route('notifications.index') }}"
+                    class="relative text-stone-600 hover:text-brand-600"
+                >
+                    Notifications
+
+                    @if ($unreadCount > 0)
+                        <span
+                            class="absolute -right-3 -top-2 rounded-full bg-red-600 px-1.5 text-xs text-white"
+                        >
+                            {{ $unreadCount }}
+                        </span>
+                    @endif
                 </a>
 
                 {{-- User --}}
@@ -91,7 +114,7 @@
 
                     <button
                         type="submit"
-                        class="text-stone-600 hover:text-blue-600"
+                        class="text-stone-600 hover:text-brand-600"
                     >
                         تسجيل خروج
                     </button>
@@ -103,7 +126,7 @@
 
                 <a
                     href="{{ route('login.create') }}"
-                    class="text-stone-600 hover:text-blue-600"
+                    class="text-stone-600 hover:text-brand-600"
                 >
                     {{ __('auth.nav_login') }}
                 </a>
@@ -112,7 +135,7 @@
 
                 <a
                     href="{{ route('register.create') }}"
-                    class="text-stone-600 hover:text-blue-600"
+                    class="text-stone-600 hover:text-brand-600"
                 >
                     {{ __('auth.nav_register') }}
                 </a>
@@ -122,3 +145,4 @@
         </div>
     </div>
 </nav>
+

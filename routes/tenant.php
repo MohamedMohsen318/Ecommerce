@@ -9,6 +9,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ShopController;
@@ -189,6 +190,19 @@ Route::middleware([
 
         Route::post('/items/{item}/comments', [CommentController::class, 'store'])
             ->name('comments.store');
+
+        // Notifications
+
+        Route::prefix('notifications')
+            ->name('notifications.')
+            ->group(function () {
+
+                Route::get('/', [NotificationController::class, 'index'])
+                    ->name('index');
+
+                Route::patch('/{notification}/read', [NotificationController::class, 'markAsRead'])
+                    ->name('read');
+            });
     });
 
     // Customer Verified Routes
