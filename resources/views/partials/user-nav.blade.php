@@ -58,6 +58,8 @@
 
             @auth
 
+                <a href="{{ route('profile.edit') }}" class="text-stone-600 hover:text-brand-600">Profile</a>
+
                 {{-- Wishlist --}}
 
                 <a
