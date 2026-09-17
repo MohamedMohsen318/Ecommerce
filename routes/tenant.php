@@ -13,6 +13,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\DealsController;
 use App\Http\Controllers\WishlistController;
 
 use App\Http\Controllers\Admin\AdminController;
@@ -132,6 +133,7 @@ Route::middleware([
 
     Route::get('/shop/{item}', [ShopController::class, 'show'])
         ->name('shop.show');
+    Route::get('/deals', [DealsController::class, 'index'])->name('deals.index');
 
 
     // Cart

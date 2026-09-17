@@ -45,6 +45,7 @@
             >
                 Shop
             </a>
+            <a href="{{ route('deals.index') }}" class="text-stone-600 hover:text-brand-600">Deals</a>
 
             {{-- Cart --}}
 
