@@ -75,6 +75,12 @@
                 Discounts
             </a>
         @endif
+        @if (auth('admins')->user()?->can('manage_comments'))
+            <a href="{{ route('admin.comments.index') }}"
+               class="block rounded-lg px-3 py-2 hover:bg-stone-800 {{ request()->routeIs('admin.comments.*') ? 'bg-stone-800 text-white' : '' }}">
+                Comments
+            </a>
+        @endif
         @if (auth('admins')->user()?->can('manage_flash_sales'))
             <a href="{{ route('admin.flash-sales.index') }}"
                class="block rounded-lg px-3 py-2 hover:bg-stone-800 {{ request()->routeIs('admin.flash-sales.*') ? 'bg-stone-800 text-white' : '' }}">

@@ -9,32 +9,31 @@
         <div class="space-y-4">
             @forelse ($addresses as $address)
                 <div class="rounded-xl border border-stone-200 bg-white p-4">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            @if ($address->label)
-                                <p class="text-sm font-medium text-stone-900">{{ $address->label }}</p>
-                            @endif
-                            <p class="text-sm text-stone-600">{{ $address->line }}</p>
-                            @if ($address->is_default)
-                                <span class="mt-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">Default</span>
-                            @endif
-                        </div>
-                        <form method="POST" action="{{ route('addresses.destroy', $address) }}"
-                              onsubmit="return confirm('Remove this address?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-xs text-red-600 hover:underline">Remove</button>
-                        </form>
-                    </div>
+                    <form method="POST" action="{{ route('addresses.update', $address) }}" class="space-y-2">
+                        @csrf @method('PATCH')
 
-                    @unless ($address->is_default)
-                        <form method="POST" action="{{ route('addresses.update', $address) }}" class="mt-2">
-                            @csrf @method('PATCH')
-                            <input type="hidden" name="line" value="{{ $address->line }}">
-                            <input type="hidden" name="label" value="{{ $address->label }}">
-                            <input type="hidden" name="is_default" value="1">
-                            <button type="submit" class="text-xs text-brand-600 hover:underline">Make default</button>
-                        </form>
-                    @endunless
+                        <input type="text" name="label" value="{{ old('label', $address->label) }}" placeholder="Label (optional)"
+                               class="block w-full rounded-lg border-stone-300 text-sm focus:border-brand-500 focus:ring-brand-500">
+
+                        <textarea name="line" rows="2" required
+                                  class="block w-full rounded-lg border-stone-300 text-sm focus:border-brand-500 focus:ring-brand-500">{{ old('line', $address->line) }}</textarea>
+
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center gap-2 text-xs text-stone-500">
+                                <input type="checkbox" name="is_default" value="1" @checked($address->is_default)
+                                class="rounded border-stone-300 text-brand-600">
+                                Default address
+                            </label>
+
+                            <button type="submit" class="text-xs text-brand-600 hover:underline">Save</button>
+                        </div>
+                    </form>
+
+                    <form method="POST" action="{{ route('addresses.destroy', $address) }}" class="mt-2"
+                          onsubmit="return confirm('Remove this address?')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="text-xs text-red-600 hover:underline">Remove</button>
+                    </form>
                 </div>
             @empty
                 <p class="text-stone-500">No saved addresses yet.</p>

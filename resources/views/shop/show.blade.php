@@ -11,6 +11,7 @@
         {{-- Product Image --}}
 
         <div>
+
             @if ($item->getFirstImageUrl())
 
                 <img
@@ -26,6 +27,7 @@
                 </div>
 
             @endif
+
         </div>
 
 
@@ -42,12 +44,25 @@
             </h1>
 
             @if ($item->effectivePrice() < $item->price)
+
                 <p class="mt-1">
-                    <span class="text-red-600 font-medium">{{ number_format($item->effectivePrice(), 2) }}</span>
-                    <span class="ml-1 text-sm text-stone-400 line-through">{{ number_format($item->price, 2) }}</span>
+
+                    <span class="text-red-600 font-medium">
+                        {{ number_format($item->effectivePrice(), 2) }}
+                    </span>
+
+                    <span class="ml-1 text-sm text-stone-400 line-through">
+                        {{ number_format($item->price, 2) }}
+                    </span>
+
                 </p>
+
             @else
-                <p class="mt-1 text-stone-500">{{ number_format($item->price, 2) }}</p>
+
+                <p class="mt-1 text-stone-500">
+                    {{ number_format($item->price, 2) }}
+                </p>
+
             @endif
 
             <p class="mt-4 text-stone-600">
@@ -58,9 +73,11 @@
             {{-- Cart Validation Error --}}
 
             @error('item_attribute_id')
+
             <p class="mt-4 text-sm text-red-600">
                 {{ $message }}
             </p>
+
             @enderror
 
 
@@ -71,6 +88,7 @@
                 action="{{ route('cart.store') }}"
                 class="mt-6 space-y-3"
             >
+
                 @csrf
 
                 <input
@@ -89,6 +107,7 @@
                         required
                         class="block w-full rounded-lg border border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500"
                     >
+
                         <option value="">
                             Choose an option
                         </option>
@@ -99,18 +118,23 @@
                                 value="{{ $variant->id }}"
                                 @disabled($variant->stock <= 0)
                             >
+
                                 {{ $variant->name }}: {{ $variant->value }}
 
                                 @if ($variant->price_modifier != 0)
+
                                     ({{ $variant->price_modifier > 0 ? '+' : '' }}{{ number_format($variant->price_modifier, 2) }})
+
                                 @endif
 
                                 @if ($variant->stock <= 0)
                                     — Out of stock
                                 @endif
+
                             </option>
 
                         @endforeach
+
                     </select>
 
                 @endif
@@ -142,6 +166,7 @@
                     action="{{ route('wishlist.toggle', $item) }}"
                     class="mt-2"
                 >
+
                     @csrf
 
                     <button
@@ -150,11 +175,13 @@
                     >
                         {{ $isWishlisted ? 'Remove from wishlist' : 'Add to wishlist' }}
                     </button>
+
                 </form>
 
             @endauth
 
         </div>
+
     </div>
 
 
@@ -176,6 +203,7 @@
                 action="{{ route('reviews.store', $item) }}"
                 class="mt-4 max-w-md space-y-3 rounded-xl border border-stone-200 bg-white p-4"
             >
+
                 @csrf
 
 
@@ -252,9 +280,13 @@
                 <div class="rounded-xl border border-stone-200 bg-white p-4">
 
                     <p class="font-medium text-stone-900">
+
                         {{ $review->user->name }}
+
                         &middot;
+
                         {{ $review->rating }}/5
+
                     </p>
 
                     @if ($review->body)
@@ -298,6 +330,7 @@
                 action="{{ route('comments.store', $item) }}"
                 class="mt-4 max-w-lg space-y-3"
             >
+
                 @csrf
 
                 <textarea
@@ -332,9 +365,69 @@
                         {{ $comment->user->name }}
                     </p>
 
-                    <p class="mt-1 text-stone-600">
-                        {{ $comment->body }}
-                    </p>
+
+                    @if (auth()->id() === $comment->user_id)
+
+                        {{-- Edit Comment --}}
+
+                        <form
+                            method="POST"
+                            action="{{ route('comments.update', $comment) }}"
+                            class="mt-1"
+                        >
+
+                            @csrf
+                            @method('PUT')
+
+                            <textarea
+                                name="body"
+                                rows="2"
+                                required
+                                class="w-full rounded-lg border border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                            >{{ $comment->body }}</textarea>
+
+                            <div class="mt-1 flex gap-3">
+
+                                <button
+                                    type="submit"
+                                    class="text-xs text-blue-600 hover:underline"
+                                >
+                                    Save
+                                </button>
+
+                            </div>
+
+                        </form>
+
+
+                        {{-- Delete Comment --}}
+
+                        <form
+                            method="POST"
+                            action="{{ route('comments.destroy', $comment) }}"
+                            class="mt-1"
+                            onsubmit="return confirm('Delete this comment?')"
+                        >
+
+                            @csrf
+                            @method('DELETE')
+
+                            <button
+                                type="submit"
+                                class="text-xs text-red-600 hover:underline"
+                            >
+                                Delete
+                            </button>
+
+                        </form>
+
+                    @else
+
+                        <p class="mt-1 text-stone-600">
+                            {{ $comment->body }}
+                        </p>
+
+                    @endif
 
 
                     {{-- Replies --}}
@@ -351,9 +444,63 @@
                                         {{ $reply->user->name }}
                                     </p>
 
-                                    <p class="text-sm text-stone-600">
-                                        {{ $reply->body }}
-                                    </p>
+                                    @if (auth()->id() === $reply->user_id)
+
+                                        <form
+                                            method="POST"
+                                            action="{{ route('comments.update', $reply) }}"
+                                            class="mt-1"
+                                        >
+
+                                            @csrf
+                                            @method('PUT')
+
+                                            <textarea
+                                                name="body"
+                                                rows="2"
+                                                required
+                                                class="w-full rounded-lg border border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            >{{ $reply->body }}</textarea>
+
+                                            <div class="mt-1 flex gap-3">
+
+                                                <button
+                                                    type="submit"
+                                                    class="text-xs text-blue-600 hover:underline"
+                                                >
+                                                    Save
+                                                </button>
+
+                                            </div>
+
+                                        </form>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ route('comments.destroy', $reply) }}"
+                                            class="mt-1"
+                                            onsubmit="return confirm('Delete this reply?')"
+                                        >
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                class="text-xs text-red-600 hover:underline"
+                                            >
+                                                Delete
+                                            </button>
+
+                                        </form>
+
+                                    @else
+
+                                        <p class="text-sm text-stone-600">
+                                            {{ $reply->body }}
+                                        </p>
+
+                                    @endif
 
                                 </div>
 
@@ -373,6 +520,7 @@
                             action="{{ route('comments.store', $item) }}"
                             class="mt-3 flex gap-2"
                         >
+
                             @csrf
 
                             <input

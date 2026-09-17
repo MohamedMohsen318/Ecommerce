@@ -18,6 +18,7 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\FlashSaleController;
 use App\Http\Controllers\Admin\ItemController;
@@ -42,6 +43,7 @@ Route::middleware([
         return view('welcome');
     })->name('home');
 
+
     // Locale
 
     Route::post('/locale', function (Request $request) {
@@ -61,7 +63,9 @@ Route::middleware([
         app()->setLocale($validated['locale']);
 
         return back();
+
     })->name('locale.update');
+
 
     // Customer Authentication
 
@@ -78,7 +82,9 @@ Route::middleware([
 
         Route::post('/login', [AuthController::class, 'login'])
             ->name('login.store');
+
     });
+
 
     // Password Reset
 
@@ -95,7 +101,9 @@ Route::middleware([
 
         Route::post('/reset-password', [PasswordResetController::class, 'reset'])
             ->name('password.update');
+
     });
+
 
     // Email Verification
 
@@ -107,11 +115,13 @@ Route::middleware([
         Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])
             ->middleware('throttle:1,1')
             ->name('verification.send');
+
     });
 
     Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
         ->middleware(['auth', 'signed'])
         ->name('verification.verify');
+
 
     // Shop
 
@@ -120,6 +130,7 @@ Route::middleware([
 
     Route::get('/shop/{item}', [ShopController::class, 'show'])
         ->name('shop.show');
+
 
     // Cart
 
@@ -138,7 +149,9 @@ Route::middleware([
 
             Route::delete('/{cartItem}', [CartController::class, 'destroy'])
                 ->name('destroy');
+
         });
+
 
     // Customer Protected Routes
 
@@ -148,6 +161,7 @@ Route::middleware([
 
         Route::post('/logout', [AuthController::class, 'logout'])
             ->name('logout');
+
 
         // Addresses
 
@@ -166,7 +180,9 @@ Route::middleware([
 
                 Route::delete('/{address}', [AddressController::class, 'destroy'])
                     ->name('destroy');
+
             });
+
 
         // Wishlist
 
@@ -179,17 +195,27 @@ Route::middleware([
 
                 Route::post('/{item}/toggle', [WishlistController::class, 'toggle'])
                     ->name('toggle');
+
             });
+
 
         // Reviews
 
         Route::post('/items/{item}/reviews', [ReviewController::class, 'store'])
             ->name('reviews.store');
 
+
         // Comments
 
         Route::post('/items/{item}/comments', [CommentController::class, 'store'])
             ->name('comments.store');
+
+        Route::put('/comments/{comment}', [CommentController::class, 'update'])
+            ->name('comments.update');
+
+        Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
+            ->name('comments.destroy');
+
 
         // Notifications
 
@@ -202,8 +228,11 @@ Route::middleware([
 
                 Route::patch('/{notification}/read', [NotificationController::class, 'markAsRead'])
                     ->name('read');
+
             });
+
     });
+
 
     // Customer Verified Routes
 
@@ -217,6 +246,7 @@ Route::middleware([
         Route::post('/checkout', [CheckoutController::class, 'store'])
             ->name('checkout.store');
 
+
         // Customer Orders
 
         Route::get('/orders', [OrderController::class, 'index'])
@@ -227,13 +257,16 @@ Route::middleware([
 
         Route::patch('/orders/{order}/cancel', [OrderController::class, 'cancel'])
             ->name('orders.cancel');
+
     });
+
 
     // Admin
 
     Route::prefix('admin')
         ->name('admin.')
         ->group(function () {
+
 
             // Admin Authentication
 
@@ -244,16 +277,20 @@ Route::middleware([
 
                 Route::post('/login', [AdminAuthController::class, 'login'])
                     ->name('login.store');
+
             });
+
 
             // Admin Protected Routes
 
             Route::middleware('auth:admins')->group(function () {
 
+
                 // Admin Logout
 
                 Route::post('/logout', [AdminAuthController::class, 'logout'])
                     ->name('logout');
+
 
                 // Dashboard
 
@@ -262,6 +299,7 @@ Route::middleware([
                         return view('admin.dashboard');
                     })
                     ->name('dashboard.index');
+
 
                 // Admin Management
 
@@ -284,7 +322,9 @@ Route::middleware([
 
                     Route::delete('/admins/{admin}', [AdminController::class, 'destroy'])
                         ->name('admins.destroy');
+
                 });
+
 
                 // Category Management
 
@@ -307,7 +347,9 @@ Route::middleware([
 
                     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])
                         ->name('categories.destroy');
+
                 });
+
 
                 // Item Management
 
@@ -330,7 +372,9 @@ Route::middleware([
 
                     Route::delete('/items/{item}', [ItemController::class, 'destroy'])
                         ->name('items.destroy');
+
                 });
+
 
                 // Discount Management
 
@@ -353,7 +397,9 @@ Route::middleware([
 
                     Route::delete('/discounts/{discount}', [DiscountController::class, 'destroy'])
                         ->name('discounts.destroy');
+
                 });
+
 
                 // Flash Sale Management
 
@@ -376,7 +422,9 @@ Route::middleware([
 
                     Route::delete('/flash-sales/{flashSale}', [FlashSaleController::class, 'destroy'])
                         ->name('flash-sales.destroy');
+
                 });
+
 
                 // Order Management
 
@@ -390,7 +438,9 @@ Route::middleware([
 
                     Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])
                         ->name('orders.update-status');
+
                 });
+
 
                 // Review Management
 
@@ -404,9 +454,24 @@ Route::middleware([
 
                     Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])
                         ->name('reviews.destroy');
+
                 });
+
+
+                // Comment Management
+
+                Route::middleware('permission:manage_comments,admins')->group(function () {
+
+                    Route::get('/comments', [AdminCommentController::class, 'index'])
+                        ->name('comments.index');
+
+                    Route::delete('/comments/{comment}', [AdminCommentController::class, 'destroy'])
+                        ->name('comments.destroy');
+
+                });
+
             });
+
         });
+
 });
-
-

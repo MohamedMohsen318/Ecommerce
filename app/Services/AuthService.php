@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+use App\Jobs\SendSlackNotification;
 
 class AuthService
 {
@@ -24,6 +25,15 @@ class AuthService
             event(new Registered($user));
         } catch (Throwable $exception) {
             Log::warning('Email verification notification could not be sent.', [
+                'user_id' => $user->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
+
+        try {
+            SendSlackNotification::dispatch("New user registered: {$user->email}");
+        } catch (Throwable $exception) {
+            Log::warning('Slack registration notification could not be queued.', [
                 'user_id' => $user->id,
                 'error' => $exception->getMessage(),
             ]);

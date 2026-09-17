@@ -8,6 +8,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\Concerns\WithTenantDatabase;
 use Tests\TestCase;
+use App\Jobs\SendSlackNotification;
+use Illuminate\Support\Facades\Bus;
 
 class RegistrationTest extends TestCase
 {
@@ -58,5 +60,18 @@ class RegistrationTest extends TestCase
         $user = User::where('email', 'jane@example.com')->firstOrFail();
 
         Notification::assertSentTo($user, VerifyEmail::class);
+    }
+    public function test_registering_dispatches_the_slack_notification_job(): void
+    {
+        Bus::fake();
+
+        $this->post($this->url('/register'), [
+            'name' => 'Jane Doe',
+            'email' => 'jane@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        Bus::assertDispatched(SendSlackNotification::class);
     }
 }

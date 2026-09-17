@@ -24,9 +24,30 @@ class ShopController extends Controller
     {
         abort_unless($item->is_active, 404);
 
-        return view('shop.show', [
-            'item' => $item->load('translations', 'variants', 'category.translations', 'flashSales'),
+        $item->load('translations', 'variants', 'category.translations', 'flashSales');
 
+        $user = auth()->user();
+        $canReview = $user
+            ? $this->reviewService->canReview($user->id, $item->id)
+            : false;
+
+        $isWishlisted = $user
+            ? $user->wishlistedItems()->whereKey($item->id)->exists()
+            : false;
+
+        return view('shop.show', [
+            'item' => $item,
+            'canReview' => $canReview,
+            'isWishlisted' => $isWishlisted,
+            'reviews' => $item->reviews()
+                ->approved()
+                ->with('user')
+                ->latest()
+                ->get(),
+            'comments' => $item->comments()
+                ->with(['user', 'replies.user'])
+                ->latest()
+                ->get(),
         ]);
     }
 }

@@ -12,6 +12,7 @@ enum PermissionEnum: string
     case ManageDiscounts = 'manage_discounts';
     case ManageOrders = 'manage_orders';
     case ManageFlashSales = 'manage_flash_sales';
+    case ManageComments = 'manage_comments';
 
     public static function values(): array
     {

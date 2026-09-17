@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use App\Events\OrderStatusChanged;
 use App\Listeners\NotifyCustomerOfStatusChange;
+use App\Models\ProductComment;
+use App\Policies\CommentPolicy;
+use Illuminate\Support\Facades\Gate;
+use App\Listeners\SendOrderStatusChangedNotification;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,6 +34,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Event::listen(Registered::class, SendEmailVerificationNotification::class);
         Event::listen(OrderStatusChanged::class, NotifyCustomerOfStatusChange::class);
+        Gate::policy(ProductComment::class, CommentPolicy::class);
+        Event::listen(OrderStatusChanged::class, SendOrderStatusChangedNotification::class);
 
         VerifyEmail::createUrlUsing(function ($notifiable): string {
             if (! app()->runningInConsole() && request()) {
