@@ -30,6 +30,8 @@ use Illuminate\Support\Facades\Route;
 
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+use App\Http\Controllers\Admin\DashboardController;
+
 
 Route::middleware([
     'web',
@@ -295,9 +297,7 @@ Route::middleware([
                 // Dashboard
 
                 Route::middleware('permission:view_dashboard,admins')
-                    ->get('/dashboard', function () {
-                        return view('admin.dashboard');
-                    })
+                    ->get('/dashboard', [DashboardController::class, 'index'])
                     ->name('dashboard.index');
 
 
