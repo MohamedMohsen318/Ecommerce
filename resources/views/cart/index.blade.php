@@ -47,7 +47,7 @@
                             value="{{ $cartItem->quantity }}"
                             min="1"
                             onchange="this.form.submit()"
-                            class="w-16 rounded-lg border border-stone-300 px-2 py-2 text-center focus:border-brand-500 focus:ring-brand-500"
+                            class="w-16 rounded-lg border border-stone-300 px-2 py-2 text-center focus:border-blue-500 focus:ring-blue-500"
                         >
                     </form>
 
@@ -107,7 +107,7 @@
 
         <div class="mt-4 flex justify-end">
             <a href="{{ route('checkout.create') }}"
-               class="rounded-xl bg-brand-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
+               class="rounded-xl bg-blue-600 px-6 py-3 font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                 Checkout
             </a>
         </div>

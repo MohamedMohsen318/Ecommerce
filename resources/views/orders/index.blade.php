@@ -8,7 +8,7 @@
     <div class="mt-8 space-y-4">
         @forelse ($orders as $order)
             <a href="{{ route('orders.show', $order) }}"
-               class="flex items-center justify-between rounded-xl border border-stone-200 bg-white p-4 hover:border-brand-500">
+               class="flex items-center justify-between rounded-xl border border-stone-200 bg-white p-4 transition hover:border-blue-500 hover:shadow-sm">
                 <div>
                     <p class="font-medium text-stone-900">Order #{{ $order->id }}</p>
                     <p class="text-sm text-stone-500">{{ $order->created_at->format('M j, Y') }} &middot; {{ $order->status->label() }}</p>

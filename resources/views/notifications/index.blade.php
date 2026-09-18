@@ -7,7 +7,7 @@
 
     <div class="mt-6 space-y-3">
         @forelse ($notifications as $notification)
-            <div class="flex items-center justify-between rounded-xl border p-4 {{ $notification->read_at ? 'border-stone-200 bg-white' : 'border-brand-200 bg-brand-50' }}">
+            <div class="flex items-center justify-between rounded-xl border p-4 {{ $notification->read_at ? 'border-stone-200 bg-white' : 'border-blue-200 bg-blue-50' }}">
                 <div>
                     <p class="text-sm text-stone-800">
                         Order #{{ $notification->data['order_id'] }} is now
@@ -17,7 +17,7 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('orders.show', $notification->data['order_id']) }}" class="text-sm text-brand-600 hover:underline">View order</a>
+                    <a href="{{ route('orders.show', $notification->data['order_id']) }}" class="text-sm font-semibold text-blue-700 hover:underline">View order</a>
                     @unless ($notification->read_at)
                         <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
                             @csrf @method('PATCH')

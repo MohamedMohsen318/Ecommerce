@@ -1,12 +1,13 @@
-@extends('layouts.app')
+@extends('layouts.admin-auth')
 
 @section('title', 'Reset password')
 
 @section('content')
-    <div class="mx-auto max-w-md">
-        <h1 class="font-display text-2xl font-semibold text-stone-900">Reset your password</h1>
+    <div>
+        <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Admin recovery</p>
+        <h1 class="mt-2 font-display text-2xl font-bold text-slate-950">Reset your password (Admin)</h1>
 
-        <form method="POST" action="{{ route('password.update') }}" class="mt-6 space-y-4">
+        <form method="POST" action="{{ route('admin.password.update') }}" class="mt-6 space-y-4">
             @csrf
             <input type="hidden" name="token" value="{{ $token }}">
 

@@ -10,19 +10,19 @@
 
         {{-- Product Image --}}
 
-        <div>
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
 
             @if ($item->getFirstImageUrl())
 
                 <img
                     src="{{ $item->getFirstImageUrl() }}"
-                    class="w-full rounded-xl object-cover"
+                    class="aspect-square w-full rounded-xl object-cover"
                     alt="{{ $item->translate()?->name }}"
                 >
 
             @else
 
-                <div class="flex h-64 items-center justify-center rounded-xl bg-stone-100 text-stone-400">
+                <div class="flex aspect-square items-center justify-center rounded-xl bg-slate-100 text-slate-400">
                     No image
                 </div>
 
@@ -33,25 +33,25 @@
 
         {{-- Product Information --}}
 
-        <div>
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:p-8">
 
-            <p class="text-sm text-stone-500">
+            <p class="inline-flex rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">
                 {{ $item->category?->translate()?->name }}
             </p>
 
-            <h1 class="mt-1 font-display text-3xl font-semibold text-stone-900">
+            <h1 class="mt-4 font-display text-4xl font-bold leading-tight text-slate-950">
                 {{ $item->translate()?->name }}
             </h1>
 
             @if ($item->effectivePrice() < $item->price)
 
-                <p class="mt-1">
+                <p class="mt-5 flex items-baseline gap-3">
 
-                    <span class="text-red-600 font-medium">
+                    <span class="text-3xl font-black text-rose-600">
                         {{ number_format($item->effectivePrice(), 2) }}
                     </span>
 
-                    <span class="ml-1 text-sm text-stone-400 line-through">
+                    <span class="text-base text-slate-400 line-through">
                         {{ number_format($item->price, 2) }}
                     </span>
 
@@ -59,13 +59,13 @@
 
             @else
 
-                <p class="mt-1 text-stone-500">
+                <p class="mt-5 text-3xl font-black text-slate-950">
                     {{ number_format($item->price, 2) }}
                 </p>
 
             @endif
 
-            <p class="mt-4 text-stone-600">
+            <p class="mt-5 leading-8 text-slate-600">
                 {{ $item->translate()?->description }}
             </p>
 
@@ -86,7 +86,7 @@
             <form
                 method="POST"
                 action="{{ route('cart.store') }}"
-                class="mt-6 space-y-3"
+                class="mt-8 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4"
             >
 
                 @csrf
@@ -105,7 +105,7 @@
                     <select
                         name="item_attribute_id"
                         required
-                        class="block w-full rounded-lg border border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                        class="block h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-teal-500 focus:ring-teal-500"
                     >
 
                         <option value="">
@@ -127,9 +127,9 @@
 
                                 @endif
 
-                                @if ($variant->stock <= 0)
-                                    — Out of stock
-                                @endif
+                            @if ($variant->stock <= 0)
+                                - Out of stock
+                            @endif
 
                             </option>
 
@@ -149,7 +149,7 @@
 
                 <button
                     type="submit"
-                    class="w-full rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white hover:bg-blue-700"
+                    class="w-full rounded-lg bg-blue-600 px-4 py-3 font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700"
                 >
                     Add to cart
                 </button>
@@ -171,7 +171,7 @@
 
                     <button
                         type="submit"
-                        class="w-full rounded-lg border border-stone-300 px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
+                        class="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
                     >
                         {{ $isWishlisted ? 'Remove from wishlist' : 'Add to wishlist' }}
                     </button>
@@ -187,9 +187,9 @@
 
     {{-- Reviews --}}
 
-    <div class="mt-12">
+    <div class="mt-12 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
-        <h2 class="text-xl font-semibold text-stone-900">
+        <h2 class="text-2xl font-bold text-slate-950">
             Reviews
         </h2>
 
@@ -201,7 +201,7 @@
             <form
                 method="POST"
                 action="{{ route('reviews.store', $item) }}"
-                class="mt-4 max-w-md space-y-3 rounded-xl border border-stone-200 bg-white p-4"
+                class="mt-4 max-w-xl space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4"
             >
 
                 @csrf
@@ -213,7 +213,7 @@
 
                     <label
                         for="rating"
-                        class="block text-sm font-medium text-stone-700"
+                        class="block text-sm font-semibold text-slate-700"
                     >
                         Rating
                     </label>
@@ -222,7 +222,7 @@
                         id="rating"
                         name="rating"
                         required
-                        class="mt-1 rounded-lg border border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                        class="mt-1 h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm focus:border-teal-500 focus:ring-teal-500"
                     >
 
                         @for ($i = 5; $i >= 1; $i--)
@@ -244,7 +244,7 @@
 
                     <label
                         for="body"
-                        class="block text-sm font-medium text-stone-700"
+                        class="block text-sm font-semibold text-slate-700"
                     >
                         Your review (optional)
                     </label>
@@ -253,7 +253,7 @@
                         id="body"
                         name="body"
                         rows="3"
-                        class="mt-1 block w-full rounded-lg border border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                        class="mt-1 block w-full rounded-lg border border-slate-200 bg-white text-sm focus:border-teal-500 focus:ring-teal-500"
                     >{{ old('body') }}</textarea>
 
                 </div>
@@ -261,7 +261,7 @@
 
                 <button
                     type="submit"
-                    class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                    class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700"
                 >
                     Submit review
                 </button>
@@ -277,9 +277,9 @@
 
             @forelse ($reviews as $review)
 
-                <div class="rounded-xl border border-stone-200 bg-white p-4">
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
 
-                    <p class="font-medium text-stone-900">
+                    <p class="font-bold text-slate-950">
 
                         {{ $review->user->name }}
 
@@ -291,7 +291,7 @@
 
                     @if ($review->body)
 
-                        <p class="mt-1 text-stone-600">
+                        <p class="mt-1 leading-7 text-slate-600">
                             {{ $review->body }}
                         </p>
 
@@ -301,7 +301,7 @@
 
             @empty
 
-                <p class="text-stone-500">
+                <p class="text-slate-500">
                     No reviews yet.
                 </p>
 
@@ -314,9 +314,9 @@
 
     {{-- Comments --}}
 
-    <div class="mt-12">
+    <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 
-        <h2 class="text-xl font-semibold text-stone-900">
+        <h2 class="text-2xl font-bold text-slate-950">
             Comments
         </h2>
 
@@ -328,7 +328,7 @@
             <form
                 method="POST"
                 action="{{ route('comments.store', $item) }}"
-                class="mt-4 max-w-lg space-y-3"
+                class="mt-4 max-w-2xl space-y-3"
             >
 
                 @csrf
@@ -337,13 +337,13 @@
                     name="body"
                     rows="3"
                     required
-                    placeholder="Write a comment..."
-                    class="block w-full rounded-lg border border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                placeholder="Write a comment..."
+                class="block w-full rounded-lg border border-slate-200 bg-slate-50 text-sm focus:border-teal-500 focus:ring-teal-500"
                 >{{ old('body') }}</textarea>
 
                 <button
-                    type="submit"
-                    class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                type="submit"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700"
                 >
                     Post comment
                 </button>
@@ -359,9 +359,9 @@
 
             @forelse ($comments as $comment)
 
-                <div class="rounded-xl border border-stone-200 bg-white p-4">
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
 
-                    <p class="font-medium text-stone-900">
+                    <p class="font-bold text-slate-950">
                         {{ $comment->user->name }}
                     </p>
 
@@ -383,14 +383,14 @@
                                 name="body"
                                 rows="2"
                                 required
-                                class="w-full rounded-lg border border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-lg border border-slate-200 bg-white text-sm focus:border-teal-500 focus:ring-teal-500"
                             >{{ $comment->body }}</textarea>
 
                             <div class="mt-1 flex gap-3">
 
                                 <button
                                     type="submit"
-                                    class="text-xs text-blue-600 hover:underline"
+                                    class="text-xs font-semibold text-teal-700 hover:underline"
                                 >
                                     Save
                                 </button>
@@ -423,7 +423,7 @@
 
                     @else
 
-                        <p class="mt-1 text-stone-600">
+                        <p class="mt-1 leading-7 text-slate-600">
                             {{ $comment->body }}
                         </p>
 
@@ -434,13 +434,13 @@
 
                     @if ($comment->replies->isNotEmpty())
 
-                        <div class="mt-3 space-y-3 border-r-2 border-stone-100 pr-4">
+                        <div class="mt-4 space-y-3 border-r-2 border-slate-200 pr-4">
 
                             @foreach ($comment->replies as $reply)
 
                                 <div>
 
-                                    <p class="text-sm font-medium text-stone-900">
+                                    <p class="text-sm font-bold text-slate-950">
                                         {{ $reply->user->name }}
                                     </p>
 
@@ -459,14 +459,14 @@
                                                 name="body"
                                                 rows="2"
                                                 required
-                                                class="w-full rounded-lg border border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                                class="w-full rounded-lg border border-slate-200 bg-white text-sm focus:border-teal-500 focus:ring-teal-500"
                                             >{{ $reply->body }}</textarea>
 
                                             <div class="mt-1 flex gap-3">
 
                                                 <button
                                                     type="submit"
-                                                    class="text-xs text-blue-600 hover:underline"
+                                                    class="text-xs font-semibold text-teal-700 hover:underline"
                                                 >
                                                     Save
                                                 </button>
@@ -496,7 +496,7 @@
 
                                     @else
 
-                                        <p class="text-sm text-stone-600">
+                                        <p class="text-sm leading-6 text-slate-600">
                                             {{ $reply->body }}
                                         </p>
 
@@ -518,7 +518,7 @@
                         <form
                             method="POST"
                             action="{{ route('comments.store', $item) }}"
-                            class="mt-3 flex gap-2"
+                            class="mt-4 flex flex-col gap-2 sm:flex-row"
                         >
 
                             @csrf
@@ -534,12 +534,12 @@
                                 name="body"
                                 required
                                 placeholder="Reply..."
-                                class="flex-1 rounded-lg border border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                class="flex-1 rounded-lg border border-slate-200 bg-white text-sm focus:border-teal-500 focus:ring-teal-500"
                             >
 
                             <button
                                 type="submit"
-                                class="rounded-lg border border-stone-300 px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-50"
+                                class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
                             >
                                 Reply
                             </button>
@@ -552,7 +552,7 @@
 
             @empty
 
-                <p class="text-stone-500">
+                <p class="text-slate-500">
                     No comments yet.
                 </p>
 

@@ -15,6 +15,8 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\DealsController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\ProfileController;
+
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
@@ -25,7 +27,8 @@ use App\Http\Controllers\Admin\FlashSaleController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\PasswordResetController as AdminPasswordResetController;
+
 
 
 use Illuminate\Http\Request;
@@ -165,7 +168,7 @@ Route::middleware([
 
         // Logout
 
-        Route::post('/logout', [AuthController::class, 'logout'])
+        Route::match(['GET', 'POST'], '/logout', [AuthController::class, 'logout'])
             ->name('logout');
 
 
@@ -287,6 +290,11 @@ Route::middleware([
 
                 Route::post('/login', [AdminAuthController::class, 'login'])
                     ->name('login.store');
+
+                Route::get('/forgot-password', [AdminPasswordResetController::class, 'showRequestForm'])->name('password.request');
+                Route::post('/forgot-password', [AdminPasswordResetController::class, 'sendResetLink'])->name('password.email');
+                Route::get('/reset-password/{token}', [AdminPasswordResetController::class, 'showResetForm'])->name('password.reset');
+                Route::post('/reset-password', [AdminPasswordResetController::class, 'reset'])->name('password.update');
 
             });
 

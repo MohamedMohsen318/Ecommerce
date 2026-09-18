@@ -89,7 +89,7 @@
                         <input type="radio" name="address_choice" value="{{ $address->id }}"
                                @checked(old('address_choice', $address->is_default ? $address->id : null) == $address->id)
                                onchange="document.getElementById('new-address-box').classList.add('hidden')"
-                               class="mt-0.5 text-brand-600 focus:ring-brand-500">
+                               class="mt-0.5 text-blue-600 focus:ring-blue-500">
                         <span>
                             @if ($address->label) <span class="font-medium text-stone-900">{{ $address->label }}:</span> @endif
                             {{ $address->line }}
@@ -101,16 +101,16 @@
                     <input type="radio" name="address_choice" value="new"
                            @checked(old('address_choice', $addresses->isEmpty() ? 'new' : null) === 'new')
                            onchange="document.getElementById('new-address-box').classList.remove('hidden')"
-                           class="mt-0.5 text-brand-600 focus:ring-brand-500">
+                           class="mt-0.5 text-blue-600 focus:ring-blue-500">
                     <span>Use a new address</span>
                 </label>
 
                 <div id="new-address-box" class="{{ old('address_choice', $addresses->isEmpty() ? 'new' : null) === 'new' ? '' : 'hidden' }} space-y-2 pl-7">
                     <textarea name="shipping_address" rows="3" placeholder="Full shipping address"
-                              class="block w-full rounded-lg border-stone-300 text-sm focus:border-brand-500 focus:ring-brand-500">{{ old('shipping_address') }}</textarea>
+                              class="block w-full rounded-lg border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500">{{ old('shipping_address') }}</textarea>
 
                     <label class="flex items-center gap-2 text-sm text-stone-600">
-                        <input type="checkbox" name="save_address" value="1" class="rounded border-stone-300 text-brand-600">
+                        <input type="checkbox" name="save_address" value="1" class="rounded border-stone-300 text-blue-600">
                         Save this address for next time
                     </label>
                 </div>
@@ -138,7 +138,7 @@
                     name="discount_code"
                     type="text"
                     value="{{ old('discount_code') }}"
-                    class="mt-1 block w-full rounded-lg border border-stone-300 uppercase focus:border-brand-500 focus:ring-brand-500"
+                    class="mt-1 block w-full rounded-lg border border-stone-300 uppercase focus:border-blue-500 focus:ring-blue-500"
                 >
 
                 @error('discount_code')
@@ -174,7 +174,7 @@
                         min="0"
                         max="{{ $pointsBalance }}"
                         value="{{ old('redeem_points', 0) }}"
-                        class="mt-1 block w-full rounded-lg border border-stone-300 focus:border-brand-500 focus:ring-brand-500"
+                        class="mt-1 block w-full rounded-lg border border-stone-300 focus:border-blue-500 focus:ring-blue-500"
                     >
 
                     @error('redeem_points')
@@ -192,7 +192,7 @@
 
             <button
                 type="submit"
-                class="w-full rounded-lg bg-brand-600 px-4 py-2.5 font-medium text-white hover:bg-brand-700"
+                class="w-full rounded-lg bg-blue-600 px-4 py-3 font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
                 Place order
             </button>

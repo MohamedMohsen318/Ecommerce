@@ -1,19 +1,16 @@
-<nav class="border-b border-stone-200 bg-white px-4 py-3 sm:px-6 lg:px-8">
-    <div class="mx-auto flex max-w-7xl items-center justify-between">
-
-        {{-- Logo --}}
-
+<nav class="sticky top-0 z-40 border-b border-white/70 bg-white/85 px-4 py-3 shadow-sm backdrop-blur sm:px-6 lg:px-8">
+    <div class="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <a
             href="{{ route('home') }}"
-            class="font-display text-lg font-semibold text-stone-900"
+            class="inline-flex items-center gap-3 font-display text-xl font-bold text-slate-950"
         >
-            {{ config('app.name') }}
+            <span class="grid h-10 w-10 place-items-center rounded-lg bg-slate-950 text-sm font-black text-white shadow-sm">
+                {{ mb_substr(config('app.name'), 0, 1) }}
+            </span>
+            <span>{{ config('app.name') }}</span>
         </a>
 
-        <div class="flex items-center gap-4 text-sm">
-
-            {{-- Locale --}}
-
+        <div class="flex flex-wrap items-center gap-2 text-sm">
             <form
                 method="POST"
                 action="{{ route('locale.update') }}"
@@ -23,7 +20,7 @@
                 <select
                     name="locale"
                     onchange="this.form.submit()"
-                    class="rounded-lg border border-stone-300 bg-white px-2 py-1 text-sm text-stone-600 focus:border-brand-500 focus:ring-brand-500"
+                    class="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 shadow-sm focus:border-teal-500 focus:ring-teal-500"
                     aria-label="Language"
                 >
                     @foreach (config('app.supported_locales') as $locale => $language)
@@ -37,48 +34,38 @@
                 </select>
             </form>
 
-            {{-- Shop --}}
-
             <a
                 href="{{ route('shop.index') }}"
-                class="text-stone-600 hover:text-brand-600"
+                class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
             >
                 Shop
             </a>
-            <a href="{{ route('deals.index') }}" class="text-stone-600 hover:text-brand-600">Deals</a>
-
-            {{-- Cart --}}
+            <a href="{{ route('deals.index') }}" class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">Deals</a>
 
             <a
                 href="{{ route('cart.index') }}"
-                class="text-stone-600 hover:text-brand-600"
+                class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
             >
                 Cart
             </a>
 
             @auth
 
-                <a href="{{ route('profile.edit') }}" class="text-stone-600 hover:text-brand-600">Profile</a>
-
-                {{-- Wishlist --}}
+                <a href="{{ route('profile.edit') }}" class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">Profile</a>
 
                 <a
                     href="{{ route('wishlist.index') }}"
-                    class="text-stone-600 hover:text-brand-600"
+                    class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
                 >
                     Wishlist
                 </a>
 
-                {{-- Addresses --}}
-
                 <a
                     href="{{ route('addresses.index') }}"
-                    class="text-stone-600 hover:text-brand-600"
+                    class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
                 >
                     Addresses
                 </a>
-
-                {{-- Notifications --}}
 
                 @php
                     $unreadCount = auth()->user()
@@ -88,26 +75,22 @@
 
                 <a
                     href="{{ route('notifications.index') }}"
-                    class="relative text-stone-600 hover:text-brand-600"
+                    class="relative rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
                 >
                     Notifications
 
                     @if ($unreadCount > 0)
                         <span
-                            class="absolute -right-3 -top-2 rounded-full bg-red-600 px-1.5 text-xs text-white"
+                            class="absolute -right-1 -top-1 rounded-full bg-rose-600 px-1.5 text-xs text-white"
                         >
                             {{ $unreadCount }}
                         </span>
                     @endif
                 </a>
 
-                {{-- User --}}
-
-                <span class="text-stone-600">
+                <span class="rounded-lg bg-slate-100 px-3 py-2 font-medium text-slate-700">
                     أهلاً، {{ auth()->user()->name }}
                 </span>
-
-                {{-- Logout --}}
 
                 <form
                     method="POST"
@@ -117,28 +100,23 @@
 
                     <button
                         type="submit"
-                        class="text-stone-600 hover:text-brand-600"
+                        class="rounded-lg border border-slate-200 bg-white px-3 py-2 font-medium text-slate-600 shadow-sm transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
                     >
                         تسجيل خروج
                     </button>
                 </form>
 
             @else
-
-                {{-- Login --}}
-
                 <a
                     href="{{ route('login.create') }}"
-                    class="text-stone-600 hover:text-brand-600"
+                    class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
                 >
                     {{ __('auth.nav_login') }}
                 </a>
 
-                {{-- Register --}}
-
                 <a
                     href="{{ route('register.create') }}"
-                    class="text-stone-600 hover:text-brand-600"
+                    class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700"
                 >
                     {{ __('auth.nav_register') }}
                 </a>
@@ -148,4 +126,3 @@
         </div>
     </div>
 </nav>
-

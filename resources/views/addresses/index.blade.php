@@ -13,19 +13,19 @@
                         @csrf @method('PATCH')
 
                         <input type="text" name="label" value="{{ old('label', $address->label) }}" placeholder="Label (optional)"
-                               class="block w-full rounded-lg border-stone-300 text-sm focus:border-brand-500 focus:ring-brand-500">
+                               class="block w-full rounded-lg border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500">
 
                         <textarea name="line" rows="2" required
-                                  class="block w-full rounded-lg border-stone-300 text-sm focus:border-brand-500 focus:ring-brand-500">{{ old('line', $address->line) }}</textarea>
+                                  class="block w-full rounded-lg border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500">{{ old('line', $address->line) }}</textarea>
 
                         <div class="flex items-center justify-between">
                             <label class="flex items-center gap-2 text-xs text-stone-500">
                                 <input type="checkbox" name="is_default" value="1" @checked($address->is_default)
-                                class="rounded border-stone-300 text-brand-600">
+                                class="rounded border-stone-300 text-blue-600">
                                 Default address
                             </label>
 
-                            <button type="submit" class="text-xs text-brand-600 hover:underline">Save</button>
+                            <button type="submit" class="text-xs font-semibold text-blue-700 hover:underline">Save</button>
                         </div>
                     </form>
 
@@ -47,21 +47,21 @@
             <div>
                 <label for="label" class="block text-sm font-medium text-stone-700">Label (optional)</label>
                 <input id="label" name="label" type="text" placeholder="Home, Work..."
-                       class="mt-1 block w-full rounded-lg border-stone-300 text-sm focus:border-brand-500 focus:ring-brand-500">
+                       class="mt-1 block w-full rounded-lg border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
 
             <div>
                 <label for="line" class="block text-sm font-medium text-stone-700">Address</label>
                 <textarea id="line" name="line" rows="3" required
-                          class="mt-1 block w-full rounded-lg border-stone-300 text-sm focus:border-brand-500 focus:ring-brand-500"></textarea>
+                          class="mt-1 block w-full rounded-lg border-stone-300 text-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
             </div>
 
             <label class="flex items-center gap-2 text-sm text-stone-600">
-                <input type="checkbox" name="is_default" value="1" class="rounded border-stone-300 text-brand-600">
+                <input type="checkbox" name="is_default" value="1" class="rounded border-stone-300 text-blue-600">
                 Make this my default address
             </label>
 
-            <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
+            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                 Save address
             </button>
         </form>

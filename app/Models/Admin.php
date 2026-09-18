@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Notifications\AdminResetPassword;
 use Spatie\Permission\Traits\HasRoles;
 
 class Admin extends Authenticatable
@@ -28,5 +29,10 @@ class Admin extends Authenticatable
         return [
             'password' => 'hashed',
         ];
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new AdminResetPassword($token));
     }
 }

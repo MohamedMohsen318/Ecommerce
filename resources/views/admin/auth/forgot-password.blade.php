@@ -1,13 +1,14 @@
-@extends('layouts.app')
+@extends('layouts.admin-auth')
 
 @section('title', 'Forgot password')
 
 @section('content')
-    <div class="mx-auto max-w-md">
-        <h1 class="font-display text-2xl font-semibold text-stone-900">Forgot your password?</h1>
-        <p class="mt-2 text-sm text-stone-500">Enter your email and we'll send you a reset link.</p>
+    <div>
+        <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Admin recovery</p>
+        <h1 class="mt-2 font-display text-2xl font-bold text-slate-950">Forgot your password? (Admin)</h1>
+        <p class="mt-2 text-sm text-slate-500">Enter your email and we'll send you a reset link.</p>
 
-        <form method="POST" action="{{ route('password.email') }}" class="mt-6 space-y-4">
+        <form method="POST" action="{{ route('admin.password.email') }}" class="mt-6 space-y-4">
             @csrf
             <div>
                 <label for="email" class="block text-sm font-medium text-stone-700">Email</label>

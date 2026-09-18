@@ -1,4 +1,4 @@
-<aside class="w-64 shrink-0 border-r border-stone-200 bg-stone-900 text-stone-200">
+<aside class="flex w-64 shrink-0 flex-col border-r border-stone-200 bg-stone-900 text-stone-200">
 
     {{-- Admin Header --}}
 
@@ -15,7 +15,7 @@
 
     {{-- Admin Navigation --}}
 
-    <nav class="space-y-1 px-3 py-4 text-sm">
+    <nav class="flex-1 space-y-1 px-3 py-4 text-sm">
 
         {{-- Dashboard --}}
 
@@ -75,15 +75,27 @@
                 Discounts
             </a>
         @endif
+
+
+        {{-- Comments --}}
+
         @if (auth('admins')->user()?->can('manage_comments'))
-            <a href="{{ route('admin.comments.index') }}"
-               class="block rounded-lg px-3 py-2 hover:bg-stone-800 {{ request()->routeIs('admin.comments.*') ? 'bg-stone-800 text-white' : '' }}">
+            <a
+                href="{{ route('admin.comments.index') }}"
+                class="block rounded-lg px-3 py-2 hover:bg-stone-800 {{ request()->routeIs('admin.comments.*') ? 'bg-stone-800 text-white' : '' }}"
+            >
                 Comments
             </a>
         @endif
+
+
+        {{-- Flash Sales --}}
+
         @if (auth('admins')->user()?->can('manage_flash_sales'))
-            <a href="{{ route('admin.flash-sales.index') }}"
-               class="block rounded-lg px-3 py-2 hover:bg-stone-800 {{ request()->routeIs('admin.flash-sales.*') ? 'bg-stone-800 text-white' : '' }}">
+            <a
+                href="{{ route('admin.flash-sales.index') }}"
+                class="block rounded-lg px-3 py-2 hover:bg-stone-800 {{ request()->routeIs('admin.flash-sales.*') ? 'bg-stone-800 text-white' : '' }}"
+            >
                 Flash Sales
             </a>
         @endif
@@ -115,21 +127,36 @@
     </nav>
 
 
-    {{-- Logout --}}
+    {{-- Admin Footer --}}
 
-    <form
-        method="POST"
-        action="{{ route('admin.logout') }}"
-        class="border-t border-stone-800 px-3 py-4"
-    >
-        @csrf
+    <div class="border-t border-stone-800 px-3 py-4">
 
-        <button
-            type="submit"
-            class="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-stone-800"
+        {{-- Forgot Password --}}
+
+        <a
+            href="{{ route('admin.password.request') }}"
+            class="mb-2 block rounded-lg px-3 py-2 text-sm text-stone-400 hover:bg-stone-800 hover:text-white"
         >
-            Log out
-        </button>
-    </form>
+            Forgot your password?
+        </a>
+
+
+        {{-- Logout --}}
+
+        <form
+            method="POST"
+            action="{{ route('admin.logout') }}"
+        >
+            @csrf
+
+            <button
+                type="submit"
+                class="w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-stone-800"
+            >
+                Log out
+            </button>
+        </form>
+
+    </div>
 
 </aside>
