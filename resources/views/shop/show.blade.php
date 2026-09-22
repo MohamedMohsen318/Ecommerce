@@ -72,7 +72,7 @@
 
             {{-- Cart Validation Error --}}
 
-            @error('item_attribute_id')
+            @error('item_variant_id')
 
             <p class="mt-4 text-sm text-red-600">
                 {{ $message }}
@@ -83,10 +83,28 @@
 
             {{-- Add To Cart --}}
 
+            @php
+                $attributeTypes = $item->attributeTypes()
+                    ->with('values')
+                    ->get();
+
+                $variantsMap = $item->variants()
+                    ->with('values')
+                    ->get()
+                    ->mapWithKeys(fn ($variant) => [
+                        $variant->values
+                            ->pluck('id')
+                            ->sort()
+                            ->values()
+                            ->implode('-') => $variant->id,
+                    ]);
+            @endphp
+
             <form
                 method="POST"
                 action="{{ route('cart.store') }}"
                 class="mt-8 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4"
+                x-data="variantPicker(@js($variantsMap))"
             >
 
                 @csrf
@@ -97,47 +115,49 @@
                     value="{{ $item->id }}"
                 >
 
+                <input
+                    type="hidden"
+                    name="item_variant_id"
+                    x-model="selectedVariantId"
+                >
 
-                {{-- Variants --}}
 
-                @if ($item->variants->isNotEmpty())
+                {{-- Attribute Types --}}
 
-                    <select
-                        name="item_attribute_id"
-                        required
-                        class="block h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-teal-500 focus:ring-teal-500"
-                    >
+                @foreach ($attributeTypes as $type)
 
-                        <option value="">
-                            Choose an option
-                        </option>
+                    <div>
 
-                        @foreach ($item->variants as $variant)
+                        <label
+                            for="attribute_type_{{ $type->id }}"
+                            class="block text-sm font-medium text-slate-700"
+                        >
+                            {{ $type->name }}
+                        </label>
 
-                            <option
-                                value="{{ $variant->id }}"
-                                @disabled($variant->stock <= 0)
-                            >
+                        <select
+                            id="attribute_type_{{ $type->id }}"
+                            @change="updateSelection()"
+                            class="mt-1 block h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-teal-500 focus:ring-teal-500"
+                        >
 
-                                {{ $variant->name }}: {{ $variant->value }}
-
-                                @if ($variant->price_modifier != 0)
-
-                                    ({{ $variant->price_modifier > 0 ? '+' : '' }}{{ number_format($variant->price_modifier, 2) }})
-
-                                @endif
-
-                            @if ($variant->stock <= 0)
-                                - Out of stock
-                            @endif
-
+                            <option value="">
+                                اختر {{ $type->name }}
                             </option>
 
-                        @endforeach
+                            @foreach ($type->values as $value)
 
-                    </select>
+                                <option value="{{ $value->id }}">
+                                    {{ $value->value }}
+                                </option>
 
-                @endif
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+                @endforeach
 
 
                 <input
@@ -147,9 +167,32 @@
                 >
 
 
+                @if ($attributeTypes->isNotEmpty())
+
+                    <p
+                        x-show="!selectedVariantId"
+                        class="text-sm text-slate-500"
+                    >
+                        اختر جميع الخصائص أولاً.
+                    </p>
+
+                @endif
+
+
+                @error('item_variant_id')
+
+                <p class="text-sm text-red-600">
+                    {{ $message }}
+                </p>
+
+                @enderror
+
+
                 <button
                     type="submit"
-                    class="w-full rounded-lg bg-blue-600 px-4 py-3 font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700"
+                    @disabled(false)
+                    :disabled="{{ $attributeTypes->isNotEmpty() ? '!selectedVariantId' : 'false' }}"
+                    class="w-full rounded-lg bg-blue-600 px-4 py-3 font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     Add to cart
                 </button>
@@ -337,13 +380,13 @@
                     name="body"
                     rows="3"
                     required
-                placeholder="Write a comment..."
-                class="block w-full rounded-lg border border-slate-200 bg-slate-50 text-sm focus:border-teal-500 focus:ring-teal-500"
+                    placeholder="Write a comment..."
+                    class="block w-full rounded-lg border border-slate-200 bg-slate-50 text-sm focus:border-teal-500 focus:ring-teal-500"
                 >{{ old('body') }}</textarea>
 
                 <button
-                type="submit"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700"
+                    type="submit"
+                    class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700"
                 >
                     Post comment
                 </button>
@@ -563,3 +606,28 @@
     </div>
 
 @endsection
+
+
+<script>
+    function variantPicker(map) {
+        return {
+            selectedVariantId: null,
+
+            updateSelection() {
+                const selects = [...this.$el.querySelectorAll('select')];
+
+                const ids = selects
+                    .map(select => select.value)
+                    .filter(Boolean)
+                    .map(Number)
+                    .sort((a, b) => a - b);
+
+                const allSelected = ids.length === selects.length;
+
+                this.selectedVariantId = allSelected
+                    ? (map[ids.join('-')] ?? null)
+                    : null;
+            }
+        };
+    }
+</script>

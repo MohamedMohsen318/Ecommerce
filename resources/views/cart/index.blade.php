@@ -20,8 +20,7 @@
 
                     @if ($cartItem->variant)
                         <p class="text-sm text-stone-500">
-                            {{ $cartItem->variant->name }}:
-                            {{ $cartItem->variant->value }}
+                            {{ $cartItem->variant->label() }}
                         </p>
                     @endif
 

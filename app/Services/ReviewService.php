@@ -23,14 +23,15 @@ class ReviewService
     }
 
     public function create(int $userId, int $itemId, int $rating, ?string $body): ProductReview
-    {
-        $orderId = $this->purchaseOrderId($userId, $itemId);
-        $alreadyReviewed = ProductReview::query()->where('item_id', $itemId)->where('user_id', $userId)->exists();
+{
+    $orderId = $this->purchaseOrderId($userId, $itemId);
+    $alreadyReviewed = ProductReview::query()->where('item_id', $itemId)->where('user_id', $userId)->exists();
 
-        if (! $orderId || $alreadyReviewed) {
-            throw new \RuntimeException("You can only review an item you've purchased, once per item.");
-        }
+    if (! $orderId || $alreadyReviewed) {
+        throw new \RuntimeException("You can only review an item you've purchased, once per item.");
+    }
 
+    try {
         return ProductReview::create([
             'item_id' => $itemId,
             'user_id' => $userId,
@@ -39,8 +40,10 @@ class ReviewService
             'body' => $body,
             'is_approved' => false,
         ]);
+    } catch (\Illuminate\Database\QueryException $e) {
+        throw new \RuntimeException("You've already reviewed this item.");
     }
-
+}
     protected function purchaseOrderId(int $userId, int $itemId): ?int
     {
         return OrderItem::query()

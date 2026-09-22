@@ -10,9 +10,17 @@ return new class extends Migration
     {
         Schema::create('cart_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cart_id')->constrained('carts')->cascadeOnDelete();
-            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
-            $table->foreignId('item_attribute_id')->nullable()->constrained('item_attributes')->nullOnDelete();
+            $table->foreignId('cart_id')
+                ->constrained('carts')
+                ->cascadeOnDelete();
+            $table->foreignId('item_id')
+                ->nullable()
+                ->constrained('items')
+                ->nullOnDelete();
+            $table->foreignId('item_variant_id')
+                ->nullable()
+                ->constrained('item_variants')
+                ->nullOnDelete();
             $table->unsignedInteger('quantity')->default(1);
             $table->timestamps();
         });

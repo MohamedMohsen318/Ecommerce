@@ -18,6 +18,8 @@ class NotificationController extends Controller
     {
         auth()->user()->notifications()->whereKey($notificationId)->first()?->markAsRead();
 
+        \Illuminate\Support\Facades\Cache::forget('unread_notifications_count_' . auth()->id());
+
         return back();
     }
 }

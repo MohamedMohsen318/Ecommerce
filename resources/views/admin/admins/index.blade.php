@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
-@section('title', 'Admins')
+@section('title', __('admin.admins'))
 
 @section('content')
     <div class="mb-6 flex items-center justify-between">
-        <h2 class="text-xl font-semibold text-stone-900">Admins</h2>
+        <h2 class="text-xl font-semibold text-stone-900">{{ __('admin.admins') }}</h2>
         <a href="{{ route('admin.admins.create') }}"
            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
-            New admin
+            {{ __('admin.new_admin') }}
         </a>
     </div>
 
@@ -15,9 +15,9 @@
         <table class="min-w-full divide-y divide-stone-200 text-sm">
             <thead class="bg-stone-50 text-left text-xs uppercase tracking-wide text-stone-500">
             <tr>
-                <th class="px-4 py-3">Name</th>
-                <th class="px-4 py-3">Email</th>
-                <th class="px-4 py-3">Roles</th>
+                <th class="px-4 py-3">{{ __('admin.name') }}</th>
+                <th class="px-4 py-3">{{ __('admin.email') }}</th>
+                <th class="px-4 py-3">{{ __('admin.roles') }}</th>
                 <th class="px-4 py-3"></th>
             </tr>
             </thead>
@@ -28,24 +28,20 @@
                     <td class="px-4 py-3 text-stone-600">{{ $admin->email }}</td>
                     <td class="px-4 py-3">
                         @foreach ($admin->roles as $role)
-                            <span class="mr-1 inline-block rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-600">
-                                {{ $role->name }}
-                            </span>
+                            <span class="mr-1 inline-block rounded-full bg-stone-100 px-2 py-0.5 text-xs text-stone-600">{{ $role->name }}</span>
                         @endforeach
                     </td>
                     <td class="px-4 py-3 text-right">
-                        <a href="{{ route('admin.admins.edit', $admin) }}" class="text-brand-600 hover:underline">Edit</a>
+                        <a href="{{ route('admin.admins.edit', $admin) }}" class="text-brand-600 hover:underline">{{ __('admin.edit') }}</a>
                         <form method="POST" action="{{ route('admin.admins.destroy', $admin) }}" class="inline"
-                              onsubmit="return confirm('Delete this admin?')">
+                              onsubmit="return confirm('{{ __('admin.confirm_delete') }}')">
                             @csrf @method('DELETE')
-                            <button type="submit" class="ml-3 text-red-600 hover:underline">Delete</button>
+                            <button type="submit" class="ml-3 text-red-600 hover:underline">{{ __('admin.delete') }}</button>
                         </form>
                     </td>
                 </tr>
             @empty
-                <tr>
-                    <td colspan="4" class="px-4 py-6 text-center text-stone-500">No admins yet.</td>
-                </tr>
+                <tr><td colspan="4" class="px-4 py-6 text-center text-stone-500">{{ __('admin.no_results') }}</td></tr>
             @endforelse
             </tbody>
         </table>

@@ -17,18 +17,13 @@ class SlackNotifier
         }
 
         try {
-            $response = Http::timeout(5)->post($webhookUrl, ['text' => $message]);
-
-            if ($response->failed()) {
-                Log::warning('Slack notification failed.', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                ]);
-            }
+            Http::timeout(5)->post($webhookUrl, ['text' => $message])->throw();
         } catch (Throwable $exception) {
             Log::warning('Slack notification could not be sent.', [
                 'error' => $exception->getMessage(),
             ]);
+
+            throw $exception;
         }
     }
 }

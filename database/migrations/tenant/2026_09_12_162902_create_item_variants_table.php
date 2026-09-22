@@ -8,19 +8,23 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('item_attributes', function (Blueprint $table) {
+        Schema::create('item_variants', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
-            $table->string('name');
-            $table->string('value');
+            $table->foreignId('item_id')
+                ->constrained('items')
+                ->cascadeOnDelete();
+            $table->string('sku')->nullable()->unique();
             $table->decimal('price_modifier', 8, 2)->default(0);
             $table->unsignedInteger('stock')->default(0);
+            $table->string('combination_hash', 64);
             $table->timestamps();
+
+            $table->unique(['item_id', 'combination_hash']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('item_attributes');
+        Schema::dropIfExists('item_variants');
     }
 };

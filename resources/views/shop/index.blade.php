@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'Shop')
@@ -28,6 +27,10 @@
     <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
         @forelse ($items as $item)
+
+            @php
+                $hasAttributes = $item->variants->isNotEmpty();
+            @endphp
 
             <article class="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
 
@@ -81,75 +84,46 @@
                         <p class="mt-3 text-2xl font-black text-slate-950">{{ number_format($item->price, 2) }}</p>
                     @endif
 
-                    <form
-                        method="POST"
-                        action="{{ route('cart.store') }}"
-                        class="mt-3 space-y-2"
-                    >
-                        @csrf
+                    @if ($hasAttributes)
 
-                        <input
-                            type="hidden"
-                            name="item_id"
-                            value="{{ $item->id }}"
+                        <a
+                            href="{{ route('shop.show', $item) }}"
+                            class="mt-3 block w-full rounded-lg bg-blue-600 px-3 py-3 text-center text-sm font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700"
                         >
+                            Choose options
+                        </a>
 
+                    @else
 
-                        {{-- Variants --}}
+                        <form
+                            method="POST"
+                            action="{{ route('cart.store') }}"
+                            class="mt-3"
+                        >
+                            @csrf
 
-                        @if ($item->variants->isNotEmpty())
-
-                            <select
-                                name="item_attribute_id"
-                                required
-                                class="block h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 focus:border-teal-500 focus:ring-teal-500"
+                            <input
+                                type="hidden"
+                                name="item_id"
+                                value="{{ $item->id }}"
                             >
 
-                                <option value="">
-                                    Choose an option
-                                </option>
+                            <input
+                                type="hidden"
+                                name="quantity"
+                                value="1"
+                            >
 
-                                @foreach ($item->variants as $variant)
+                            <button
+                                type="submit"
+                                class="w-full rounded-lg bg-blue-600 px-3 py-3 text-sm font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700"
+                            >
+                                Add to cart
+                            </button>
 
-                                    <option
-                                        value="{{ $variant->id }}"
-                                        @disabled($variant->stock <= 0)
-                                    >
-                                        {{ $variant->name }}: {{ $variant->value }}
+                        </form>
 
-                                        @if ($variant->price_modifier != 0)
-
-                                            ({{ $variant->price_modifier > 0 ? '+' : '' }}{{ number_format($variant->price_modifier, 2) }})
-
-                                        @endif
-
-                                        @if ($variant->stock <= 0)
-                                            - Out of stock
-                                        @endif
-                                    </option>
-
-                                @endforeach
-
-                            </select>
-
-                        @endif
-
-
-                        <input
-                            type="hidden"
-                            name="quantity"
-                            value="1"
-                        >
-
-
-                        <button
-                            type="submit"
-                            class="w-full rounded-lg bg-blue-600 px-3 py-3 text-sm font-bold text-white shadow-sm shadow-blue-200 transition hover:bg-blue-700"
-                        >
-                            Add to cart
-                        </button>
-
-                    </form>
+                    @endif
 
                 </div>
 
@@ -166,8 +140,6 @@
 
     </div>
 
-
-    {{-- Pagination --}}
 
     <div class="mt-6">
         {{ $items->links() }}

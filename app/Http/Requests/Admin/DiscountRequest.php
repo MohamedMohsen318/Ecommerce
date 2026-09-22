@@ -25,6 +25,7 @@ class DiscountRequest extends FormRequest
             'max_uses' => ['nullable', 'integer', 'min:1'],
             'expires_at' => ['nullable', 'date'],
             'is_active' => ['sometimes', 'boolean'],
+            'once_per_customer' => ['sometimes', 'boolean'],
         ];
     }
 }

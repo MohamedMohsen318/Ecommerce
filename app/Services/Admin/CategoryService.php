@@ -76,10 +76,6 @@ class CategoryService
         }
     }
 
-    /**
-     * نطلع لفوق في نسب الفئة الأب المقترحة. لو وصلنا لنفس $category،
-     * معناه هنعمل حلقة مقفولة (Category تبقى أب لنفسها بشكل غير مباشر).
-     */
     protected function wouldCreateCycle(Category $category, ?int $newParentId): bool
     {
         while ($newParentId !== null) {

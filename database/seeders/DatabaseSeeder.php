@@ -7,11 +7,14 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
-    {
-        $this->call([
-            RolesAndPermissionsSeeder::class,
-            AdminSeeder::class,
-            CatalogSeeder::class,
-        ]);
+{
+    $this->call([
+        RolesAndPermissionsSeeder::class,
+        AdminSeeder::class,
+    ]);
+
+    if (app()->environment('local')) {
+        $this->call(CatalogSeeder::class);
     }
+}
 }

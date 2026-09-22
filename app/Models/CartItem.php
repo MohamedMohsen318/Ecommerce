@@ -11,5 +11,5 @@ class CartItem extends Model
 {
     use CartItemPricing, CartItemRelations, HasFactory;
 
-    protected $fillable = ['cart_id', 'item_id', 'item_attribute_id', 'quantity'];
+    protected $fillable = ['cart_id', 'item_id', 'item_variant_id', 'quantity'];
 }

@@ -10,9 +10,16 @@ return new class extends Migration
     {
         Schema::create('product_comments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('parent_id')->nullable()->constrained('product_comments')->nullOnDelete();
+            $table->foreignId('item_id')
+                ->constrained('items')
+                ->cascadeOnDelete();
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+            $table->foreignId('parent_id')
+                ->nullable()
+                ->constrained('product_comments')
+                ->cascadeOnDelete();
             $table->text('body');
             $table->timestamps();
         });

@@ -9,8 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('wishlists', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+            $table->foreignId('item_id')
+                ->constrained('items')
+                ->cascadeOnDelete();
             $table->timestamps();
 
             $table->primary(['user_id', 'item_id']);

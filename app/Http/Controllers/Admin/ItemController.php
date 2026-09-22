@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ItemRequest;
+use App\Http\Requests\Admin\ItemVariantsRequest;
 use App\Models\Category;
 use App\Models\Item;
 use App\Services\Admin\ItemService;
@@ -38,7 +39,7 @@ class ItemController extends Controller
     public function edit(Item $item): View
     {
         return view('admin.items.edit', [
-            'item' => $item->load('translations', 'variants'),
+            'item' => $item->load('translations', 'attributeTypes.values'),
             'categories' => Category::query()->with('translations')->get(),
         ]);
     }
@@ -55,5 +56,20 @@ class ItemController extends Controller
         $this->itemService->delete($item);
 
         return redirect()->route('admin.items.index')->with('success', 'Item deleted.');
+    }
+
+    public function editVariants(Item $item): View
+    {
+        return view('admin.items.variants', [
+            'item' => $item->load('attributeTypes.values', 'variants.values.type'),
+            'combinations' => $this->itemService->generateCombinations($item),
+        ]);
+    }
+
+    public function updateVariants(ItemVariantsRequest $request, Item $item): RedirectResponse
+    {
+        $this->itemService->syncVariants($item, $request->validated('variants', []));
+
+        return redirect()->route('admin.items.index')->with('success', 'Variants updated.');
     }
 }

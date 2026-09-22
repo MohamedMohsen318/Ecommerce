@@ -10,10 +10,19 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
-            $table->foreignId('item_id')->nullable()->constrained('items')->nullOnDelete();
-            $table->foreignId('item_attribute_id')->nullable()->constrained('item_attributes')->nullOnDelete();
+            $table->foreignId('order_id')
+                ->constrained('orders')
+                ->cascadeOnDelete();
+            $table->foreignId('item_id')
+                ->nullable()
+                ->constrained('items')
+                ->nullOnDelete();
+            $table->foreignId('item_variant_id')
+                ->nullable()
+                ->constrained('item_variants')
+                ->nullOnDelete();
             $table->string('item_name');
+            $table->string('variant_label')->nullable();
             $table->decimal('unit_price', 10, 2);
             $table->unsignedInteger('quantity');
             $table->timestamps();

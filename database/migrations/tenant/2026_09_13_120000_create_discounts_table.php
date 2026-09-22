@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedInteger('used_count')->default(0);
             $table->timestamp('expires_at')->nullable();
             $table->boolean('is_active')->default(true);
+            $table->boolean('once_per_customer')->default(false);
             $table->timestamps();
         });
     }

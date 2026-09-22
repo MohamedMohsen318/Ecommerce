@@ -13,6 +13,7 @@ trait CategoryTree
         $query->where('is_active', true);
     }
 
+
     public static function tree(): Collection
     {
         $categories = Category::query()->active()->with('translations')->orderBy('order')->get();

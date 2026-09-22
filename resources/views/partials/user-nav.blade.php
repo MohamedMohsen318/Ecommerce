@@ -1,5 +1,16 @@
+@php
+    $unreadCount = auth()->check()
+        ? \Illuminate\Support\Facades\Cache::remember(
+            "unread_notifications_count_" . auth()->id(),
+            now()->addMinutes(2),
+            fn () => auth()->user()->unreadNotifications()->count()
+        )
+        : 0;
+@endphp
+
 <nav class="sticky top-0 z-40 border-b border-white/70 bg-white/85 px-4 py-3 shadow-sm backdrop-blur sm:px-6 lg:px-8">
     <div class="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
         <a
             href="{{ route('home') }}"
             class="inline-flex items-center gap-3 font-display text-xl font-bold text-slate-950"
@@ -7,14 +18,13 @@
             <span class="grid h-10 w-10 place-items-center rounded-lg bg-slate-950 text-sm font-black text-white shadow-sm">
                 {{ mb_substr(config('app.name'), 0, 1) }}
             </span>
+
             <span>{{ config('app.name') }}</span>
         </a>
 
         <div class="flex flex-wrap items-center gap-2 text-sm">
-            <form
-                method="POST"
-                action="{{ route('locale.update') }}"
-            >
+
+            <form method="POST" action="{{ route('locale.update') }}">
                 @csrf
 
                 <select
@@ -40,7 +50,55 @@
             >
                 Shop
             </a>
-            <a href="{{ route('deals.index') }}" class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">Deals</a>
+
+            <div class="group relative">
+                <button
+                    type="button"
+                    class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
+                >
+                    {{ __('admin.categories') }}
+                </button>
+
+                <div class="invisible absolute right-0 z-50 mt-1 w-64 rounded-lg border border-slate-200 bg-white p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">
+
+                    @forelse ($categoryTree ?? [] as $category)
+
+                        <div class="px-3 py-1.5 text-sm font-semibold text-slate-900">
+                            {{ $category->translate()?->name }}
+                        </div>
+
+                        @if ($category->children->isNotEmpty())
+                            <div class="mb-1 ml-2 border-r border-slate-100 pr-2">
+
+                                @foreach ($category->children as $child)
+                                    <a
+                                        href="{{ route('shop.index', ['category' => $child->id]) }}"
+                                        class="block rounded px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                                    >
+                                        {{ $child->translate()?->name }}
+                                    </a>
+                                @endforeach
+
+                            </div>
+                        @endif
+
+                    @empty
+
+                        <p class="px-3 py-2 text-sm text-slate-400">
+                            {{ __('admin.no_results') }}
+                        </p>
+
+                    @endforelse
+
+                </div>
+            </div>
+
+            <a
+                href="{{ route('deals.index') }}"
+                class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
+            >
+                Deals
+            </a>
 
             <a
                 href="{{ route('cart.index') }}"
@@ -51,7 +109,12 @@
 
             @auth
 
-                <a href="{{ route('profile.edit') }}" class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950">Profile</a>
+                <a
+                    href="{{ route('profile.edit') }}"
+                    class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
+                >
+                    Profile
+                </a>
 
                 <a
                     href="{{ route('wishlist.index') }}"
@@ -67,12 +130,6 @@
                     Addresses
                 </a>
 
-                @php
-                    $unreadCount = auth()->user()
-                        ->unreadNotifications()
-                        ->count();
-                @endphp
-
                 <a
                     href="{{ route('notifications.index') }}"
                     class="relative rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"
@@ -80,9 +137,7 @@
                     Notifications
 
                     @if ($unreadCount > 0)
-                        <span
-                            class="absolute -right-1 -top-1 rounded-full bg-rose-600 px-1.5 text-xs text-white"
-                        >
+                        <span class="absolute -right-1 -top-1 rounded-full bg-rose-600 px-1.5 text-xs text-white">
                             {{ $unreadCount }}
                         </span>
                     @endif
@@ -92,10 +147,7 @@
                     أهلاً، {{ auth()->user()->name }}
                 </span>
 
-                <form
-                    method="POST"
-                    action="{{ route('logout') }}"
-                >
+                <form method="POST" action="{{ route('logout') }}">
                     @csrf
 
                     <button
@@ -107,6 +159,7 @@
                 </form>
 
             @else
+
                 <a
                     href="{{ route('login.create') }}"
                     class="rounded-lg px-3 py-2 font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950"

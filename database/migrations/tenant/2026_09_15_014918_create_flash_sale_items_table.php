@@ -10,8 +10,12 @@ return new class extends Migration
     {
         Schema::create('flash_sale_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('flash_sale_id')->constrained('flash_sales')->cascadeOnDelete();
-            $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
+            $table->foreignId('flash_sale_id')
+                ->constrained('flash_sales')
+                ->cascadeOnDelete();
+            $table->foreignId('item_id')
+                ->constrained('items')
+                ->cascadeOnDelete();
             $table->decimal('sale_price', 10, 2);
             $table->timestamps();
 

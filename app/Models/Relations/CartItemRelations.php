@@ -4,7 +4,7 @@ namespace App\Models\Relations;
 
 use App\Models\Cart;
 use App\Models\Item;
-use App\Models\ItemAttribute;
+use App\Models\ItemVariant;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait CartItemRelations
@@ -21,6 +21,6 @@ trait CartItemRelations
 
     public function variant(): BelongsTo
     {
-        return $this->belongsTo(ItemAttribute::class, 'item_attribute_id');
+        return $this->belongsTo(ItemVariant::class, 'item_variant_id');
     }
 }

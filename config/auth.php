@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AuthGuard;
 use App\Models\User;
 
 return [
@@ -11,7 +12,7 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
+        'guard' => env('AUTH_GUARD', AuthGuard::Web->value),
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
     ],
 
@@ -24,13 +25,13 @@ return [
     'guards' => [
 
         // Customer Authentication
-        'web' => [
+        AuthGuard::Web->value => [
             'driver' => 'session',
             'provider' => 'users',
         ],
 
         // Admin Authentication
-        'admins' => [
+        AuthGuard::Admins->value => [
             'driver' => 'session',
             'provider' => 'admins',
         ],

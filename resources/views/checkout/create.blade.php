@@ -163,7 +163,7 @@
                         Redeem points
 
                         <span class="text-stone-400">
-                            (you have {{ $pointsBalance }} - 100 points = $1)
+                             (you have {{ $pointsBalance }} — {{ config('loyalty.points_per_dollar_redeemed') }} points = $1)
                         </span>
                     </label>
 

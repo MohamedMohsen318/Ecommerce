@@ -64,8 +64,12 @@ Route::middleware([
             ],
         ]);
 
+        $refererPath = parse_url((string) $request->headers->get('referer', ''), PHP_URL_PATH) ?? '';
+
+        $sessionKey = str_contains($refererPath, '/admin') ? 'admin_locale' : 'locale';
+
         session([
-            'locale' => $validated['locale'],
+            $sessionKey => $validated['locale'],
         ]);
 
         app()->setLocale($validated['locale']);
@@ -153,11 +157,8 @@ Route::middleware([
             Route::post('/', [CartController::class, 'store'])
                 ->name('store');
 
-            Route::put('/{cartItem}', [CartController::class, 'update'])
-                ->name('update');
-
-            Route::delete('/{cartItem}', [CartController::class, 'destroy'])
-                ->name('destroy');
+            Route::put('/{cartItem}', [CartController::class, 'update'])->name('update');
+            Route::delete('/{cartItem}', [CartController::class, 'destroy'])->name('destroy');
 
         });
 
@@ -168,9 +169,7 @@ Route::middleware([
 
         // Logout
 
-        Route::match(['GET', 'POST'], '/logout', [AuthController::class, 'logout'])
-            ->name('logout');
-
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
         // Addresses
 
@@ -373,6 +372,12 @@ Route::middleware([
 
                     Route::get('/items', [ItemController::class, 'index'])
                         ->name('items.index');
+
+                    Route::get('/items/{item}/variants', [ItemController::class, 'editVariants'])
+                        ->name('items.variants.edit');
+
+                    Route::put('/items/{item}/variants', [ItemController::class, 'updateVariants'])
+                        ->name('items.variants.update');
 
                     Route::get('/items/create', [ItemController::class, 'create'])
                         ->name('items.create');

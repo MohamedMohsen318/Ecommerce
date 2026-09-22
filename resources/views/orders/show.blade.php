@@ -59,6 +59,11 @@
                     <p class="font-medium text-stone-900">
                         {{ $item->item_name }}
                     </p>
+                    @if ($item->variant_label)
+                        <p class="text-sm text-stone-500">
+                            {{ $item->variant_label }}
+                        </p>
+                    @endif
 
                     <p class="text-sm text-stone-500">
                         Qty: {{ $item->quantity }}

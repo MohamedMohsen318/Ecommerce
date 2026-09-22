@@ -11,7 +11,7 @@ class OrderItem extends Model
 {
     use HasFactory, OrderItemPricing, OrderItemRelations;
 
-    protected $fillable = ['order_id', 'item_id', 'item_attribute_id', 'item_name', 'unit_price', 'quantity'];
+    protected $fillable = ['order_id', 'item_id', 'item_variant_id', 'variant_label', 'item_name', 'unit_price', 'quantity'];
 
     protected function casts(): array
     {

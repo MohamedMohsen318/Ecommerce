@@ -16,14 +16,22 @@ class CheckoutController extends Controller
         private CartService $cartService,
         private OrderService $orderService,
         private AddressService $addressService,
-    ) {}
+    ) {
+    }
 
     public function create(Request $request): View
     {
-        $cart = $this->cartService->currentCart(auth()->id(), $request->session()->getId());
+        $cart = $this->cartService->currentCart(
+            auth()->id(),
+            $request->session()->getId()
+        );
 
         return view('checkout.create', [
-            'cart' => $cart->load('items.item.translations', 'items.item.flashSales', 'items.variant'),
+            'cart' => $cart->load(
+                'items.item.translations',
+                'items.item.flashSales',
+                'items.variant.values.type'
+            ),
             'addresses' => auth()->user()->addresses()->latest()->get(),
             'pointsBalance' => auth()->user()->loyaltyPointsBalance(),
         ]);
@@ -33,7 +41,12 @@ class CheckoutController extends Controller
     {
         $data = $request->validate([
             'address_choice' => ['required', 'string'],
-            'shipping_address' => ['required_if:address_choice,new', 'nullable', 'string', 'max:500'],
+            'shipping_address' => [
+                'required_if:address_choice,new',
+                'nullable',
+                'string',
+                'max:500',
+            ],
             'save_address' => ['sometimes', 'boolean'],
             'discount_code' => ['nullable', 'string', 'max:50'],
             'redeem_points' => ['nullable', 'integer', 'min:0'],
@@ -41,17 +54,33 @@ class CheckoutController extends Controller
 
         $shippingAddress = $data['address_choice'] === 'new'
             ? $data['shipping_address']
-            : Address::query()->where('user_id', auth()->id())->find($data['address_choice'])?->line;
+            : Address::query()
+                ->where('user_id', auth()->id())
+                ->find($data['address_choice'])
+                ?->line;
 
         if (! $shippingAddress) {
-            return back()->withErrors(['shipping_address' => 'Please choose or enter a shipping address.'])->withInput();
+            return back()
+                ->withErrors([
+                    'shipping_address' => 'Please choose or enter a shipping address.',
+                ])
+                ->withInput();
         }
 
-        if ($data['address_choice'] === 'new' && $request->boolean('save_address')) {
-            $this->addressService->create(auth()->id(), ['line' => $shippingAddress]);
+        if (
+            $data['address_choice'] === 'new'
+            && $request->boolean('save_address')
+        ) {
+            $this->addressService->create(
+                auth()->id(),
+                ['line' => $shippingAddress]
+            );
         }
 
-        $cart = $this->cartService->currentCart(auth()->id(), $request->session()->getId());
+        $cart = $this->cartService->currentCart(
+            auth()->id(),
+            $request->session()->getId()
+        );
 
         try {
             $order = $this->orderService->checkout(
@@ -62,9 +91,15 @@ class CheckoutController extends Controller
                 $data['redeem_points'] ?? 0,
             );
         } catch (\RuntimeException $e) {
-            return back()->withErrors(['checkout' => $e->getMessage()])->withInput();
+            return back()
+                ->withErrors([
+                    'checkout' => $e->getMessage(),
+                ])
+                ->withInput();
         }
 
-        return redirect()->route('orders.show', $order)->with('success', 'Order placed!');
+        return redirect()
+            ->route('orders.show', $order)
+            ->with('success', 'Order placed!');
     }
 }

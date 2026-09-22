@@ -28,11 +28,11 @@ class ItemRequest extends FormRequest
             'translations.ar.name' => ['nullable', 'string', 'max:255'],
             'translations.ar.description' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'max:2048'],
-            'variants' => ['nullable', 'array'],
-            'variants.*.name' => ['nullable', 'string', 'max:100'],
-            'variants.*.value' => ['nullable', 'string', 'max:100'],
-            'variants.*.price_modifier' => ['nullable', 'numeric'],
-            'variants.*.stock' => ['nullable', 'integer', 'min:0'],
+
+            'attribute_types' => ['nullable', 'array'],
+            'attribute_types.*.name' => ['nullable', 'string', 'max:100'],
+            'attribute_types.*.values' => ['nullable', 'array'],
+            'attribute_types.*.values.*' => ['nullable', 'string', 'max:100'],
         ];
     }
 }

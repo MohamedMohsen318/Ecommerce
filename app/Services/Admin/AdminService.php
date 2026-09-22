@@ -32,18 +32,19 @@ class AdminService
     public function update(Admin $admin, array $data): Admin
     {
         return DB::transaction(function () use ($admin, $data) {
-            $admin->update(array_filter([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => $data['password'] ?? null,
-            ], fn ($value) => $value !== null));
+            $admin->name = $data['name'];
+            $admin->email = $data['email'];
 
+            if (! empty($data['password'])) {
+                $admin->password = $data['password'];
+            }
+
+            $admin->save();
             $admin->syncRoles($data['roles']);
 
             return $admin;
         });
     }
-
     public function delete(Admin $admin, Admin $actingAdmin): void
     {
         if ($admin->is($actingAdmin)) {

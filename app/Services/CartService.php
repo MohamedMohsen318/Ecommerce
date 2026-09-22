@@ -15,11 +15,11 @@ class CartService
         return Cart::firstOrCreate(['session_id' => $sessionId, 'user_id' => null]);
     }
 
-    public function addItem(Cart $cart, int $itemId, ?int $itemAttributeId, int $quantity): void
+    public function addItem(Cart $cart, int $itemId, ?int $itemVariantId, int $quantity): void
     {
         $existing = $cart->items()
             ->where('item_id', $itemId)
-            ->where('item_attribute_id', $itemAttributeId)
+            ->where('item_variant_id', $itemVariantId)
             ->first();
 
         if ($existing) {
@@ -30,7 +30,7 @@ class CartService
 
         $cart->items()->create([
             'item_id' => $itemId,
-            'item_attribute_id' => $itemAttributeId,
+            'item_variant_id' => $itemVariantId,
             'quantity' => $quantity,
         ]);
     }
@@ -61,7 +61,7 @@ class CartService
         foreach ($guestCart->items as $guestItem) {
             $existing = $userCart->items()
                 ->where('item_id', $guestItem->item_id)
-                ->where('item_attribute_id', $guestItem->item_attribute_id)
+                ->where('item_variant_id', $guestItem->item_variant_id)
                 ->first();
 
             if ($existing) {

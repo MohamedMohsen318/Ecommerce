@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\Enums\AuthGuard;
+use App\Notifications\AdminResetPassword;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Notifications\AdminResetPassword;
 use Spatie\Permission\Traits\HasRoles;
 
 class Admin extends Authenticatable
 {
-    use Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles;
 
-    protected string $guard_name = 'admins';
+    protected string $guard_name = AuthGuard::Admins->value;
 
     protected $fillable = [
         'name',

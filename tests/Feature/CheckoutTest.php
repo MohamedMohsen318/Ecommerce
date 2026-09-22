@@ -100,4 +100,27 @@ class CheckoutTest extends TestCase
 
         app(OrderService::class)->checkout($cart->fresh('items'), $user->id, '123 Test St', 'EXPIRED');
     }
+    public function test_checkout_uses_variant_price_and_stock(): void
+    {
+        $user = User::factory()->create();
+        $item = Item::factory()->create(['price' => 50, 'stock' => 0]);
+
+        $type = $item->attributeTypes()->create(['name' => 'Size', 'order' => 0]);
+        $small = $type->values()->create(['value' => 'Small', 'order' => 0]);
+
+        $variant = $item->variants()->create([
+            'price_modifier' => 5,
+            'stock' => 10,
+            'combination_hash' => \App\Models\ItemVariant::hashFor([$small->id]),
+        ]);
+        $variant->values()->attach($small->id);
+
+        $cart = Cart::factory()->create(['user_id' => $user->id]);
+        $cart->items()->create(['item_id' => $item->id, 'item_variant_id' => $variant->id, 'quantity' => 2]);
+
+        $order = app(OrderService::class)->checkout($cart->fresh('items'), $user->id, '123 Test St');
+
+        $this->assertEquals(110.00, $order->subtotal);
+        $this->assertEquals(8, $variant->fresh()->stock);
+    }
 }

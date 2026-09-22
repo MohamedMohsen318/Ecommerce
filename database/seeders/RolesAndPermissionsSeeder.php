@@ -13,23 +13,52 @@ class RolesAndPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
+        $guardName = AuthGuard::Admins->value;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Permissions
+        |--------------------------------------------------------------------------
+        */
+
         foreach (PermissionEnum::cases() as $permission) {
             Permission::firstOrCreate([
                 'name' => $permission->value,
-                'guard_name' => AuthGuard::Admins->value,
+                'guard_name' => $guardName,
             ]);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Super Admin Role
+        |--------------------------------------------------------------------------
+        */
+
         $superAdmin = Role::firstOrCreate([
             'name' => RoleEnum::SuperAdmin->value,
-            'guard_name' => AuthGuard::Admins->value,
+            'guard_name' => $guardName,
         ]);
-        $superAdmin->syncPermissions(PermissionEnum::values());
 
+        $superAdmin->syncPermissions(
+            PermissionEnum::values()
+        );
 
-        Role::firstOrCreate([
+        /*
+        |--------------------------------------------------------------------------
+        | Support Role
+        |--------------------------------------------------------------------------
+        */
+
+        $support = Role::firstOrCreate([
             'name' => RoleEnum::Support->value,
-            'guard_name' => AuthGuard::Admins->value,
+            'guard_name' => $guardName,
+        ]);
+
+        $support->syncPermissions([
+            PermissionEnum::ViewDashboard->value,
+            PermissionEnum::ManageOrders->value,
+            PermissionEnum::ManageComments->value,
+            PermissionEnum::ManageReviews->value,
         ]);
     }
 }

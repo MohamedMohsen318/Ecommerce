@@ -14,17 +14,26 @@ class ProfileController extends Controller
             'user' => auth()->user(),
         ]);
     }
-
     public function update(ProfileRequest $request): RedirectResponse
     {
         $data = $request->validated();
+        $user = auth()->user();
+        $emailChanged = $data['email'] !== $user->email;
 
-        auth()->user()->update(array_filter([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
-            'password' => $data['password'] ?? null,
-        ], fn ($value) => $value !== null));
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->phone = $data['phone'] ?? null;
+
+        if (! empty($data['password'])) {
+            $user->password = $data['password'];
+        }
+
+        $user->save();
+
+        if ($emailChanged) {
+            $user->forceFill(['email_verified_at' => null])->save();
+            $user->sendEmailVerificationNotification();
+        }
 
         return back()->with('success', 'Profile updated.');
     }

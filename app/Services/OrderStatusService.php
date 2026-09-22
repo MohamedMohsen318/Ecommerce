@@ -6,16 +6,13 @@ use App\Enums\OrderStatus;
 use App\Events\OrderStatusChanged;
 use App\Models\Admin;
 use App\Models\Item;
-use App\Models\ItemAttribute;
+use App\Models\ItemVariant;
 use App\Models\LoyaltyPointTransaction;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
 
 class OrderStatusService
 {
-    /**
-     * @var array<string, list<string>>
-     */
     private const TRANSITIONS = [
         'pending' => ['confirmed', 'cancelled'],
         'confirmed' => ['preparing', 'cancelled'],
@@ -25,9 +22,6 @@ class OrderStatusService
         'cancelled' => [],
     ];
 
-    /**
-     * @return \Illuminate\Support\Collection<int, OrderStatus>
-     */
     public function allowedTransitions(Order $order): \Illuminate\Support\Collection
     {
         return collect(self::TRANSITIONS[$order->status->value] ?? [])
@@ -65,8 +59,8 @@ class OrderStatusService
     protected function restoreStock(Order $order): void
     {
         foreach ($order->items as $orderItem) {
-            if ($orderItem->item_attribute_id) {
-                ItemAttribute::whereKey($orderItem->item_attribute_id)->increment('stock', $orderItem->quantity);
+            if ($orderItem->item_variant_id) {
+                ItemVariant::whereKey($orderItem->item_variant_id)->increment('stock', $orderItem->quantity);
             } elseif ($orderItem->item_id) {
                 Item::whereKey($orderItem->item_id)->increment('stock', $orderItem->quantity);
             }

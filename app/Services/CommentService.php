@@ -8,8 +8,12 @@ class CommentService
 {
     public function create(int $userId, int $itemId, string $body, ?int $parentId = null): ProductComment
     {
-        if ($parentId && ! ProductComment::query()->where('item_id', $itemId)->whereKey($parentId)->exists()) {
-            throw new \RuntimeException('You can only reply to comments on this item.');
+        if ($parentId) {
+            $parent = ProductComment::query()->where('item_id', $itemId)->find($parentId);
+
+            if (! $parent || $parent->parent_id !== null) {
+                throw new \RuntimeException('You can only reply to a top-level comment.');
+            }
         }
 
         return ProductComment::create([

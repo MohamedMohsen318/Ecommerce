@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 
 use App\Enums\MediaType;
 use App\Models\Item;
+use App\Models\ItemVariant;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -26,7 +27,7 @@ class ItemService
             ]);
 
             $this->syncTranslations($item, $data['translations']);
-            $this->syncVariants($item, $data['variants'] ?? []);
+            $this->syncAttributes($item, $data['attribute_types'] ?? []);
 
             if (! empty($data['image'])) {
                 $item->setMedia($data['image'], MediaType::Image, 'items');
@@ -48,7 +49,7 @@ class ItemService
             ]);
 
             $this->syncTranslations($item, $data['translations']);
-            $this->syncVariants($item, $data['variants'] ?? []);
+            $this->syncAttributes($item, $data['attribute_types'] ?? []);
 
             if (! empty($data['image'])) {
                 $item->setMedia($data['image'], MediaType::Image, 'items');
@@ -72,31 +73,102 @@ class ItemService
         }
     }
 
-    protected function syncVariants(Item $item, array $variants): void
+    protected function syncAttributes(Item $item, array $attributeTypes): void
     {
-        $keptIds = [];
+        $keptTypeIds = [];
 
-        foreach ($variants as $variant) {
-            if (empty($variant['name']) || empty($variant['value'])) {
+        foreach ($attributeTypes as $order => $typeData) {
+            if (empty($typeData['name']) || empty(array_filter($typeData['values'] ?? []))) {
                 continue;
             }
 
-            $attributes = [
-                'name' => $variant['name'],
-                'value' => $variant['value'],
-                'price_modifier' => $variant['price_modifier'] ?? 0,
-                'stock' => $variant['stock'] ?? 0,
-            ];
+            $type = $item->attributeTypes()->updateOrCreate(
+                ['name' => trim($typeData['name'])],
+                ['order' => $order]
+            );
+            $keptTypeIds[] = $type->id;
 
-            if (! empty($variant['id'])) {
-                $existing = $item->variants()->whereKey($variant['id'])->firstOrFail();
-                $existing->update($attributes);
-                $keptIds[] = $existing->id;
-            } else {
-                $keptIds[] = $item->variants()->create($attributes)->id;
+            $keptValueIds = [];
+            foreach (array_values($typeData['values']) as $valueOrder => $rawValue) {
+                $value = trim((string) $rawValue);
+                if ($value === '') {
+                    continue;
+                }
+
+                $attrValue = $type->values()->updateOrCreate(
+                    ['value' => $value],
+                    ['order' => $valueOrder]
+                );
+                $keptValueIds[] = $attrValue->id;
             }
+
+            $type->values()->whereNotIn('id', $keptValueIds)->delete();
         }
 
-        $item->variants()->whereNotIn('id', $keptIds)->delete();
+        $item->attributeTypes()->whereNotIn('id', $keptTypeIds)->delete();
+    }
+
+    /**
+     * @return array<int, array{value_ids: int[], labels: string[], existing: ?ItemVariant}>
+     */
+    public function generateCombinations(Item $item): array
+    {
+        $types = $item->attributeTypes()->with('values')->get();
+
+        if ($types->isEmpty()) {
+            return [];
+        }
+
+        $existingByHash = $item->variants()->with('values.type')->get()->keyBy('combination_hash');
+
+        $combinations = [[]];
+
+        foreach ($types as $type) {
+            $next = [];
+            foreach ($combinations as $combo) {
+                foreach ($type->values as $value) {
+                    $next[] = [...$combo, $value];
+                }
+            }
+            $combinations = $next;
+        }
+
+        return collect($combinations)->map(function (array $values) use ($existingByHash) {
+            $ids = collect($values)->pluck('id')->all();
+            $hash = ItemVariant::hashFor($ids);
+
+            return [
+                'value_ids' => $ids,
+                'labels' => collect($values)->map(fn ($v) => $v->value)->all(),
+                'existing' => $existingByHash->get($hash),
+            ];
+        })->all();
+    }
+
+    public function syncVariants(Item $item, array $variantsInput): void
+    {
+        $keptVariantIds = [];
+
+        foreach ($variantsInput as $row) {
+            if (empty($row['selected']) || empty($row['value_ids']) || ! is_numeric($row['stock'] ?? null)) {
+                continue;
+            }
+
+            $hash = ItemVariant::hashFor($row['value_ids']);
+
+            $variant = $item->variants()->updateOrCreate(
+                ['combination_hash' => $hash],
+                [
+                    'sku' => $row['sku'] ?? null,
+                    'price_modifier' => $row['price_modifier'] ?? 0,
+                    'stock' => $row['stock'],
+                ]
+            );
+
+            $variant->values()->sync($row['value_ids']);
+            $keptVariantIds[] = $variant->id;
+        }
+
+        $item->variants()->whereNotIn('id', $keptVariantIds)->delete();
     }
 }
