@@ -14,15 +14,18 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    //SetLocale Ar&En
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->appendToGroup('web', SetLocale::class);
 
+       // Spatie Permission
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
 
+        // Redirect guests to admin or customer login
         $middleware->redirectGuestsTo(fn ($request) => $request->is('admin/*')
             ? route('admin.login.create')
             : route('login.create')
