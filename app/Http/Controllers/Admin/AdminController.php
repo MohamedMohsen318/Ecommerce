@@ -12,7 +12,9 @@ use Spatie\Permission\Models\Role;
 
 class AdminController extends Controller
 {
-    public function __construct(private AdminService $adminService) {}
+    public function __construct(private AdminService $adminService) {
+
+    }
 
     public function index(): View
     {
@@ -20,6 +22,14 @@ class AdminController extends Controller
             'admins' => $this->adminService->paginate(),
         ]);
     }
+    /*
+     *  public function index(AdminService $adminService): View
+    {
+        return view('admin.admins.index', [
+            'admins' => $adminService->paginate(),
+        ]);
+    } sUB __construct(
+     * */
 
     public function create(): View
     {

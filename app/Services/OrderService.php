@@ -23,76 +23,36 @@ class OrderService
         return (int) config('loyalty.points_per_dollar_redeemed');
     }
 
-    public function checkout(
-        Cart $cart,
-        int $userId,
-        string $shippingAddress,
-        ?string $discountCode = null,
-        int $redeemPoints = 0,
-    ): Order {
+    public function checkout(Cart $cart, int $userId, string $shippingAddress, ?string $discountCode = null, int $redeemPoints = 0): Order
+    {
         if ($cart->items->isEmpty()) {
             throw new \RuntimeException('Your cart is empty.');
         }
 
-        return DB::transaction(function () use (
-            $cart,
-            $userId,
-            $shippingAddress,
-            $discountCode,
-            $redeemPoints
-        ) {
-            $lockedItems = $this->lockItems($cart);
+        return DB::transaction(function () use ($cart, $userId, $shippingAddress, $discountCode, $redeemPoints) {
+            // lock rows so two checkouts can't oversell the same stock
+            $items = $this->lockItems($cart);
+            $variants = $this->lockVariants($cart);
 
-            $lockedVariants = $this->lockVariants($cart);
+            [$subtotal, $orderItems] = $this->prepareOrderItems($cart, $items, $variants);
 
-            [$subtotal, $orderItemsData] = $this->prepareOrderItems(
-                $cart,
-                $lockedItems,
-                $lockedVariants
-            );
+            [$discount, $discountAmount] = $this->applyDiscount($discountCode, $subtotal, $userId);
 
-            [$discount, $discountAmount] = $this->applyDiscount(
-                $discountCode,
-                $subtotal,
-                $userId
-            );
+            $remainingAmount = max($subtotal - $discountAmount, 0);
 
-            $maxPointsDiscount = max(
-                $subtotal - $discountAmount,
-                0
-            );
+            $pointsDiscount = $this->pointsDiscountAmount($userId, $redeemPoints, $remainingAmount);
 
-            $pointsDiscountAmount = $this->pointsDiscountAmount(
-                $userId,
+            // don't burn more points than the discount actually needed
+            $pointsUsed = min(
                 $redeemPoints,
-                $maxPointsDiscount
+                (int) ceil($pointsDiscount * $this->pointsPerDollarRedeemed())
             );
 
-            $actualPointsUsed = (int) min(
-                $redeemPoints,
-                ceil(
-                    $pointsDiscountAmount
-                    * $this->pointsPerDollarRedeemed()
-                )
-            );
+            $order = $this->createOrder($userId, $shippingAddress, $subtotal, $discount, $discountAmount, $pointsUsed, $pointsDiscount);
 
-            $order = $this->createOrder(
-                $userId,
-                $shippingAddress,
-                $subtotal,
-                $discount,
-                $discountAmount,
-                $actualPointsUsed,
-                $pointsDiscountAmount
-            );
+            $order->items()->createMany($orderItems);
 
-            $order->items()->createMany($orderItemsData);
-
-            $this->redeemPoints(
-                $userId,
-                $order->id,
-                $actualPointsUsed
-            );
+            $this->redeemPoints($userId, $order->id, $pointsUsed);
 
             $this->awardPoints($order);
 
@@ -104,12 +64,7 @@ class OrderService
 
     protected function lockItems(Cart $cart)
     {
-        $itemIds = $cart->items
-            ->pluck('item_id')
-            ->filter()
-            ->unique()
-            ->sort()
-            ->values();
+        $itemIds = $cart->items->pluck('item_id')->unique();
 
         return Item::query()
             ->whereIn('id', $itemIds)
@@ -122,12 +77,7 @@ class OrderService
 
     protected function lockVariants(Cart $cart)
     {
-        $variantIds = $cart->items
-            ->pluck('item_variant_id')
-            ->filter()
-            ->unique()
-            ->sort()
-            ->values();
+        $variantIds = $cart->items->pluck('item_variant_id')->filter()->unique();
 
         return ItemVariant::query()
             ->whereIn('id', $variantIds)
@@ -138,116 +88,85 @@ class OrderService
             ->keyBy('id');
     }
 
-    protected function prepareOrderItems(
-        Cart $cart,
-             $lockedItems,
-             $lockedVariants
-    ): array {
-        $subtotal = 0.0;
-
-        $orderItemsData = [];
+    protected function prepareOrderItems(Cart $cart, $items, $variants): array
+    {
+        $subtotal = 0;
+        $orderItems = [];
 
         foreach ($cart->items as $cartItem) {
-            $item = $lockedItems->get($cartItem->item_id);
+            $item = $items->get($cartItem->item_id);
 
             if (! $item) {
-                throw new \RuntimeException(
-                    'An item in your cart is no longer available.'
-                );
+                throw new \RuntimeException('An item in your cart is no longer available.');
             }
 
-            $variant = $cartItem->item_variant_id
-                ? $lockedVariants->get($cartItem->item_variant_id)
-                : null;
+            $variant = null;
 
-            $this->validateVariant(
-                $cartItem->item_variant_id,
-                $variant,
-                $item
-            );
+            if ($cartItem->item_variant_id) {
+                $variant = $variants->get($cartItem->item_variant_id);
+            }
 
-            $availableStock = $variant
-                ? $variant->stock
-                : $item->stock;
+            $this->validateVariant($cartItem->item_variant_id, $variant, $item);
 
-            if ($availableStock < $cartItem->quantity) {
+            $stock = $variant ? $variant->stock : $item->stock;
+
+            if ($stock < $cartItem->quantity) {
                 $name = $item->translate('en')?->name ?? 'This item';
 
-                throw new \RuntimeException(
-                    "{$name} doesn't have enough stock left."
-                );
+                throw new \RuntimeException("{$name} doesn't have enough stock left.");
             }
 
-            $unitPrice = $this->calculateUnitPrice(
-                $item,
-                $variant
-            );
+            $price = $this->calculateUnitPrice($item, $variant);
 
-            $subtotal += $unitPrice * $cartItem->quantity;
+            $subtotal += $price * $cartItem->quantity;
 
-            $orderItemsData[] = [
+            $orderItems[] = [
                 'item_id' => $item->id,
                 'item_variant_id' => $variant?->id,
                 'variant_label' => $variant?->label(),
                 'item_name' => $item->translate('en')?->name ?? 'Item',
-                'unit_price' => $unitPrice,
+                'unit_price' => $price,
                 'quantity' => $cartItem->quantity,
             ];
 
-            $this->decreaseStock(
-                $item,
-                $variant,
-                $cartItem->quantity
-            );
+            $this->decreaseStock($item, $variant, $cartItem->quantity);
         }
 
-        return [$subtotal, $orderItemsData];
+        return [$subtotal, $orderItems];
     }
 
-    protected function validateVariant(
-        $variantId,
-        ?ItemVariant $variant,
-        Item $item
-    ): void {
-        if (
-            $variantId
-            && (! $variant || $variant->item_id !== $item->id)
-        ) {
-            throw new \RuntimeException(
-                'Something in your cart is no longer valid. Please review your cart.'
-            );
+    protected function validateVariant($variantId, ?ItemVariant $variant, Item $item): void
+    {
+        if ($variantId && (! $variant || $variant->item_id !== $item->id)) {
+            throw new \RuntimeException('Something in your cart is no longer valid. Please review your cart.');
         }
     }
 
-    protected function calculateUnitPrice(
-        Item $item,
-        ?ItemVariant $variant
-    ): float {
-        return $item->effectivePrice()
-            + (float) ($variant?->price_modifier ?? 0);
+    protected function calculateUnitPrice(Item $item, ?ItemVariant $variant): float
+    {
+        $price = $item->effectivePrice();
+
+        if ($variant) {
+            $price += (float) $variant->price_modifier;
+        }
+
+        return $price;
     }
 
-    protected function decreaseStock(
-        Item $item,
-        ?ItemVariant $variant,
-        int $quantity
-    ): void {
+    protected function decreaseStock(Item $item, ?ItemVariant $variant, int $quantity): void
+    {
         if ($variant) {
             $variant->decrement('stock', $quantity);
-
             return;
         }
 
         $item->decrement('stock', $quantity);
     }
 
-    protected function applyDiscount(
-        ?string $code,
-        float $subtotal,
-        int $userId
-    ): array {
+    protected function applyDiscount(?string $code, float $subtotal, int $userId): array
+    {
         if (! $code) {
-            return [null, 0.0];
+            return [null, 0];
         }
 
         $discount = Discount::query()
@@ -256,41 +175,31 @@ class OrderService
             ->first();
 
         if (! $discount || ! $discount->isValid()) {
-            throw new \RuntimeException(
-                'This discount code is not valid.'
-            );
+            throw new \RuntimeException('This discount code is not valid.');
         }
 
         if ($discount->once_per_customer) {
-            $alreadyUsed = Order::query()
+            $used = Order::query()
                 ->where('user_id', $userId)
                 ->where('discount_id', $discount->id)
                 ->exists();
 
-            if ($alreadyUsed) {
-                throw new \RuntimeException(
-                    'You have already used this discount code.'
-                );
+            if ($used) {
+                throw new \RuntimeException('You have already used this discount code.');
             }
         }
 
-        $amount = min(
-            $discount->amountFor($subtotal),
-            $subtotal
-        );
+        $amount = min($discount->amountFor($subtotal), $subtotal);
 
         $discount->increment('used_count');
 
         return [$discount, $amount];
     }
 
-    protected function pointsDiscountAmount(
-        int $userId,
-        int $points,
-        float $maxDiscountable
-    ): float {
+    protected function pointsDiscountAmount(int $userId, int $points, float $maxDiscountable): float
+    {
         if ($points <= 0 || $maxDiscountable <= 0) {
-            return 0.0;
+            return 0;
         }
 
         $balance = (int) LoyaltyPointTransaction::query()
@@ -299,35 +208,17 @@ class OrderService
             ->sum('points');
 
         if ($points > $balance) {
-            throw new \RuntimeException(
-                "You don't have enough loyalty points."
-            );
+            throw new \RuntimeException("You don't have enough loyalty points.");
         }
 
-        return round(
-            min(
-                $points / $this->pointsPerDollarRedeemed(),
-                $maxDiscountable
-            ),
-            2
-        );
+        $pointsValue = $points / $this->pointsPerDollarRedeemed();
+
+        return round(min($pointsValue, $maxDiscountable), 2);
     }
 
-    protected function createOrder(
-        int $userId,
-        string $shippingAddress,
-        float $subtotal,
-        ?Discount $discount,
-        float $discountAmount,
-        int $actualPointsUsed,
-        float $pointsDiscountAmount
-    ): Order {
-        $total = max(
-            $subtotal
-            - $discountAmount
-            - $pointsDiscountAmount,
-            0
-        );
+    protected function createOrder(int $userId, string $shippingAddress, float $subtotal, ?Discount $discount, float $discountAmount, int $pointsUsed, float $pointsDiscount): Order
+    {
+        $total = max($subtotal - $discountAmount - $pointsDiscount, 0);
 
         return Order::create([
             'user_id' => $userId,
@@ -335,18 +226,15 @@ class OrderService
             'status' => OrderStatus::Pending,
             'subtotal' => $subtotal,
             'discount_amount' => $discountAmount,
-            'points_redeemed' => $actualPointsUsed,
-            'points_discount_amount' => $pointsDiscountAmount,
+            'points_redeemed' => $pointsUsed,
+            'points_discount_amount' => $pointsDiscount,
             'total' => $total,
             'shipping_address' => $shippingAddress,
         ]);
     }
 
-    protected function redeemPoints(
-        int $userId,
-        int $orderId,
-        int $points
-    ): void {
+    protected function redeemPoints(int $userId, int $orderId, int $points): void
+    {
         if ($points <= 0) {
             return;
         }
@@ -361,19 +249,16 @@ class OrderService
 
     protected function awardPoints(Order $order): void
     {
-        $earned = (int) floor(
-            (float) $order->total
-            * $this->pointsPerDollarEarned()
-        );
+        $points = (int) floor($order->total * $this->pointsPerDollarEarned());
 
-        if ($earned <= 0) {
+        if ($points <= 0) {
             return;
         }
 
         LoyaltyPointTransaction::create([
             'user_id' => $order->user_id,
             'order_id' => $order->id,
-            'points' => $earned,
+            'points' => $points,
             'reason' => 'order_placed',
         ]);
     }

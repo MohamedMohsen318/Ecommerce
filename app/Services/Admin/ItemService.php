@@ -18,20 +18,9 @@ class ItemService
     public function create(array $data): Item
     {
         return DB::transaction(function () use ($data) {
-            $item = Item::create([
-                'category_id' => $data['category_id'] ?? null,
-                'price' => $data['price'],
-                'stock' => $data['stock'],
-                'sku' => $data['sku'] ?? null,
-                'is_active' => $data['is_active'] ?? false,
-            ]);
+            $item = Item::create($this->itemFields($data));
 
-            $this->syncTranslations($item, $data['translations']);
-            $this->syncAttributes($item, $data['attribute_types'] ?? []);
-
-            if (! empty($data['image'])) {
-                $item->setMedia($data['image'], MediaType::Image, 'items');
-            }
+            $this->saveRelations($item, $data);
 
             return $item;
         });
@@ -40,20 +29,9 @@ class ItemService
     public function update(Item $item, array $data): Item
     {
         return DB::transaction(function () use ($item, $data) {
-            $item->update([
-                'category_id' => $data['category_id'] ?? null,
-                'price' => $data['price'],
-                'stock' => $data['stock'],
-                'sku' => $data['sku'] ?? null,
-                'is_active' => $data['is_active'] ?? false,
-            ]);
+            $item->update($this->itemFields($data));
 
-            $this->syncTranslations($item, $data['translations']);
-            $this->syncAttributes($item, $data['attribute_types'] ?? []);
-
-            if (! empty($data['image'])) {
-                $item->setMedia($data['image'], MediaType::Image, 'items');
-            }
+            $this->saveRelations($item, $data);
 
             return $item;
         });
@@ -62,6 +40,27 @@ class ItemService
     public function delete(Item $item): void
     {
         $item->delete();
+    }
+
+    protected function itemFields(array $data): array
+    {
+        return [
+            'category_id' => $data['category_id'] ?? null,
+            'price' => $data['price'],
+            'stock' => $data['stock'],
+            'sku' => $data['sku'] ?? null,
+            'is_active' => $data['is_active'] ?? false,
+        ];
+    }
+
+    protected function saveRelations(Item $item, array $data): void
+    {
+        $this->syncTranslations($item, $data['translations']);
+        $this->syncAttributes($item, $data['attribute_types'] ?? []);
+
+        if (! empty($data['image'])) {
+            $item->setMedia($data['image'], MediaType::Image, 'items');
+        }
     }
 
     protected function syncTranslations(Item $item, array $translations): void
@@ -86,11 +85,13 @@ class ItemService
                 ['name' => trim($typeData['name'])],
                 ['order' => $order]
             );
-            $keptTypeIds[] = $type->id;
 
+            $keptTypeIds[] = $type->id;
             $keptValueIds = [];
+
             foreach (array_values($typeData['values']) as $valueOrder => $rawValue) {
                 $value = trim((string) $rawValue);
+
                 if ($value === '') {
                     continue;
                 }
@@ -99,6 +100,7 @@ class ItemService
                     ['value' => $value],
                     ['order' => $valueOrder]
                 );
+
                 $keptValueIds[] = $attrValue->id;
             }
 
@@ -121,28 +123,35 @@ class ItemService
 
         $existingByHash = $item->variants()->with('values.type')->get()->keyBy('combination_hash');
 
+        // build every possible mix of values, one value from each type
         $combinations = [[]];
 
         foreach ($types as $type) {
             $next = [];
+
             foreach ($combinations as $combo) {
                 foreach ($type->values as $value) {
                     $next[] = [...$combo, $value];
                 }
             }
+
             $combinations = $next;
         }
 
-        return collect($combinations)->map(function (array $values) use ($existingByHash) {
-            $ids = collect($values)->pluck('id')->all();
-            $hash = ItemVariant::hashFor($ids);
+        $result = [];
 
-            return [
+        foreach ($combinations as $values) {
+            $values = collect($values);
+            $ids = $values->pluck('id')->all();
+
+            $result[] = [
                 'value_ids' => $ids,
-                'labels' => collect($values)->map(fn ($v) => $v->value)->all(),
-                'existing' => $existingByHash->get($hash),
+                'labels' => $values->pluck('value')->all(),
+                'existing' => $existingByHash->get(ItemVariant::hashFor($ids)),
             ];
-        })->all();
+        }
+
+        return $result;
     }
 
     public function syncVariants(Item $item, array $variantsInput): void
@@ -154,10 +163,8 @@ class ItemService
                 continue;
             }
 
-            $hash = ItemVariant::hashFor($row['value_ids']);
-
             $variant = $item->variants()->updateOrCreate(
-                ['combination_hash' => $hash],
+                ['combination_hash' => ItemVariant::hashFor($row['value_ids'])],
                 [
                     'sku' => $row['sku'] ?? null,
                     'price_modifier' => $row['price_modifier'] ?? 0,
@@ -166,6 +173,7 @@ class ItemService
             );
 
             $variant->values()->sync($row['value_ids']);
+
             $keptVariantIds[] = $variant->id;
         }
 

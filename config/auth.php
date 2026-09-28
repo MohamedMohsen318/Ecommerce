@@ -29,7 +29,6 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-
         // Admin Authentication
         AuthGuard::Admins->value => [
             'driver' => 'session',
@@ -51,7 +50,6 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
         ],
-
         // Admin Provider
         'admins' => [
             'driver' => 'eloquent',
@@ -65,9 +63,7 @@ return [
     | Password Resetting
     |--------------------------------------------------------------------------
     */
-
     'passwords' => [
-
         // Customer Password Reset
         'users' => [
             'provider' => 'users',
@@ -78,7 +74,6 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
-
         // Admin Password Reset
         'admins' => [
             'provider' => 'admins',
